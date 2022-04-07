@@ -1,0 +1,9 @@
+services:
+  mynteye:
+    image: "mjpc13/ros:melodic-mynteye"
+    network_mode: host
+    privileged: true
+    environment:
+        - SETUP=/root/MYNT-EYE-S-SDK/wrappers/ros/devel/setup.bash
+    command: roslaunch mynt_eye_ros_wrapper mynteye.launch #perhaps it would be best to create our own launch file
+
