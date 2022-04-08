@@ -1,20 +1,25 @@
 services:
-  melodic:
+  ros-melodic:
     image: "mjpc13/ros:melodic-mynteye"
+    #Mount the src/ folder inside the docker container
+    volumes:
+        - type: bind
+          source: ../catkin_ws/src
+          target: /opt/app/catkin_ws/src
     network_mode: host
     privileged: true
     environment:
-        - SETUP=/opt/app/MYNT-EYE-S-SDK/wrappers/ros/devel/setup.bash
-        - ROSPACKAGE=mynt_eye_ros_wrapper
-        - LAUNCHFILE=mynteye.launch
+        - SETUP=/opt/app/catkin_ws/devel/setup.bash
+        - ROSPACKAGE=sensor-tools
+        - LAUNCHFILE=apparatus-melodic.launch
     command: ./launch.sh #perhaps it would be best to create our own launch file
-  noetic:
+  ros-noetic:
     image: "mjpc13/ros:noetic-semfire-apparatus"
     #Mount the src/ folder inside the docker container
     volumes:
-            - type: bind
-              source: ../catkin_ws/src
-              target: /opt/app/catkin_ws/src
+        - type: bind
+          source: ../catkin_ws/src
+          target: /opt/app/catkin_ws/src
     network_mode: host
     privileged: true
     environment:
