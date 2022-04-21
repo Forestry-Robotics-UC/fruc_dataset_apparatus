@@ -1,14 +1,17 @@
 <launch>
 	<include file="$(find realsense2_camera)/launch/rs_camera.launch">
+		<arg name="camera" value="realsense"/>
 		<arg name="enable_infra" value="true"/>
 		<arg name="enable_infra1" value="true"/>
 		<arg name="enable_infra2" value="true"/>
 		<arg name="enable_gyro" value="true"/>
 		<arg name="enable_accel" value="true"/>
+		<arg name="enable_pointcloud" value="true"/>
 	</include>
 
 	<include file="$(find livox_ros_driver)/launch/livox_lidar.launch">
 		<arg name="msg_frame_id" value="map"/>
 	</include>
+	<node pkg="tf" type="static_transform_publisher" name="realsense2map" args="0.0 0.0 0.0 0.0 0.0 0.0 realsense_depth_optical_frame map 40"/>
 
 </launch>
