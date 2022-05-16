@@ -60,9 +60,39 @@ roslaunch $ROSPACKAGE $LAUNCHFILE
 
 ## Environment Variables
 
-- SETUP: The path for the setup.bash file used in the source. default: "opt/ros/$ROS_DISTRO/devel/setup.bash"
-- LAUNCHFILE: The launch file to be executed when running the container
-- ROSPACKAGE: The package of the desired launch file
+- **SETUP**: The path for the setup.bash file used in the source. default: "opt/ros/$ROS_DISTRO/devel/setup.bash"
+- **LAUNCHFILE**: The launch file to be executed when running the container
+- **ROSPACKAGE**: The package of the desired launch file
+
+### Xsens
+
+Xsens allows configuration of their devices these environments change the configuration of the Legacy devices.
+
+- **XSENS_MTI_OUTPUT_MODE** - Select the information to output of Legacy infos. Can be a string composed of the following characters (in any order):
+	- t temperature
+	- c calibrated data
+	- o orientation data
+        - a auxiliary data
+        - p position data (requires MTi-G)
+        - v velocity data (requires MTi-G)
+        - s status data
+        - g raw GPS mode (requires MTi-G)
+        - r raw (incompatible with others except raw GPS)
+
+- **XSENS_MTI_OUTPUT_SETTINGS** - Settings of the Legacy device. This is required for 'legacy-configure' command.Can be a string composed of the following characters (in any order):
+	- t sample count (excludes 'n')
+	- n no sample count (excludes 't')
+	- u UTC time
+	- q orientation in quaternion (excludes 'e' and 'm')
+	- e orientation in Euler angles (excludes 'm' and 'q')
+	- m orientation in matrix (excludes 'q' and 'e')
+	- A acceleration in calibrated data
+	- G rate of turn in calibrated data
+	- M magnetic field in calibrated data
+	- i only analog input 1 (excludes 'j')
+	- j only analog input 2 (excludes 'i')
+	- N North-East-Down instead of default: X North Z up
+
 
 # Known Issues
 
@@ -88,5 +118,3 @@ The error can be caused by:
 ros-noetic_1   | [build] Note: Workspace packages have changed, please re-source setup files to use them.
 ```
 **TODO**: Check if this is the source of the bug and fix it
-
-
