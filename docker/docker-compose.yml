@@ -12,6 +12,9 @@ services:
         - SETUP=/opt/app/catkin_ws/devel/setup.bash
         - ROSPACKAGE=sensor-tools
         - LAUNCHFILE=apparatus-melodic.launch
+        - XSENS_MTI_OUTPUTMODE=sotac #Paramenters related to configuration of Xsens MTi Legacy
+        - XSENS_MTI_OUTPUTSETTINGS=tuqMAG #Paramenters related to configuration of Xsens MTi Legacy
+
     command: ./launch.sh #perhaps it would be best to create our own launch file
   ros-noetic:
     image: "mjpc13/ros:noetic-semfire-apparatus"
