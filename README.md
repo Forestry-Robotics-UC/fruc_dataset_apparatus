@@ -123,36 +123,3 @@ else
 fi
 roslaunch $ROSPACKAGE $LAUNCHFILE
 ```
-
-
-# Known Issues
-
-## Failed to set power-state
-
-The first time **$ docker-compose up** command runs it causes the following error
-```bash
-ros-noetic_1   | [ INFO] [1649690810.431061260]:  
-ros-noetic_1   |  11/04 15:26:50,453 ERROR [139972816103168] (handle-libusb.h:51) failed to open usb interface: 0, error: RS2_USB_STATUS_NO_DEVICE
-ros-noetic_1   |  11/04 15:26:50,453 ERROR [139972355016448] (sensor.cpp:572) acquire_power failed: failed to set power state
-ros-noetic_1   |  11/04 15:26:50,453 WARNING [139972355016448] (rs.cpp:310) null pointer passed for argument "device"
-ros-noetic_1   | [ WARN] [1649690816.495320536]: Device 1/1 failed with exception: failed to set power state
-ros-noetic_1   | [ERROR] [1649690816.495398671]: The requested device with  is NOT found. Will Try again.
-```
-
-Exit the docker-compose and **without deleting the containers** (don't run docker-compose down) re-run:
-```bash
-docker compose up
-```
-
-The error can be caused by:
-```bash
-ros-noetic_1   | [build] Note: Workspace packages have changed, please re-source setup files to use them.
-```
-**TODO**: Check if this is the source of the bug and fix it
-
-## Simultaneous launch of melodic and noetic
-
-There is a chance of creating two different rosmaster (that leads to an error and crashes one of the containers). This is happening because the 2 containers are launching at practly the same time. Possible solution is to add a delay in one of the apparatus-\*.yml launch file.
-
-A workaround is to run ```roscore``` first in the host computer.
-
