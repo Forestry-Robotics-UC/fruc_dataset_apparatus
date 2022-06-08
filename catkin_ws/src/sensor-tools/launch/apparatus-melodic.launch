@@ -1,4 +1,12 @@
 <launch>
+	<!--  Remap topics from XSENS IMU Driver -->
+	<remap from="velocity" to="imu/velocity"/>
+	<remap from="analog_in1" to="imu/analog_in1"/>
+	<remap from="analog_in2" to="imu/analog_in2"/>
+	<remap from="diagnostics" to="imu/diagnostics"/>
+	<remap from="diagnostics" to="imu/diagnostics"/>
+	<remap from="temperature" to="imu/temperature"/>
+	<remap from="imu_data_str" to="imu/imu_data_str"/>
 
 	<include file="$(find mynt_eye_ros_wrapper)/launch/mynteye.launch" />
 	<include file="$(find xsens_driver)/launch/xsens_driver.launch" >
