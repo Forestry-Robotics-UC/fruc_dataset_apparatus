@@ -25,9 +25,10 @@ docker compose up
 
 Mount the src/ folder of this repository into "/opt/app/catkin_ws/src"
 
-## Environment Variables
+### Environment Variables
 
 - **SETUP**: The path for the setup.bash file used in the source. default: "opt/ros/$ROS_DISTRO/devel/setup.bash"
+- **BUILDLIST**: Packages to be compiled by catkin_tools
 - **LAUNCHFILE**: The launch file to be executed when running the container
 - **ROSPACKAGE**: The package of the desired launch file
 - **XSENS_MODE**: Paramenters related to configuration of Xsens MTi Legacy
@@ -93,6 +94,13 @@ roslaunch $ROSPACKAGE $LAUNCHFILE #launch the file
 ### Volume
 
 Mount the src/ folder of this repository into "/opt/app/catkin_ws/src"
+
+### Environment Variables
+
+- **SETUP**: The path for the setup.bash file used in the source. default: "opt/ros/$ROS_DISTRO/devel/setup.bash"
+- **BUILDLIST**: Packages to be compiled by catkin_tools
+- **LAUNCHFILE**: The launch file to be executed when running the container
+- **ROSPACKAGE**: The package of the desired launch file
 
 ### Run Script
 
