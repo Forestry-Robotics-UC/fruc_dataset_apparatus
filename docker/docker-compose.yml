@@ -1,14 +1,28 @@
 version: "3"
 
+networks:
+  ros:
+    driver: bridge
+
 services:
+  ros-master:
+    image: ros:noetic-ros-core
+    command: stdbuf -o L roscore
+    networks:
+      - ros
+    #restart: always
+
   ros-melodic:
     image: "mjpc13/ros:melodic-mynteye"
+    depends_on:
+      - ros-master
     #Mount the src/ folder inside the docker container
     volumes:
         - type: bind
           source: ../catkin_ws/src
           target: /opt/app/catkin_ws/src
-    network_mode: host
+    networks:
+      - ros
     privileged: true
     environment:
         - SETUP=/opt/app/catkin_ws/devel/setup.bash
@@ -18,14 +32,18 @@ services:
         - XSENS_MODE=sotac #Paramenters related to configuration of Xsens MTi Legacy
         - XSENS_SETTINGS=tqMAG #Paramenters related to configuration of Xsens MTi Legacy
     command: ./launch.sh
+  
   ros-noetic:
     image: "mjpc13/ros:noetic-semfire-apparatus"
+    depends_on:
+      - ros-master
     #Mount the src/ folder inside the docker container
     volumes:
         - type: bind
           source: ../catkin_ws/src
           target: /opt/app/catkin_ws/src
-    network_mode: host
+    networks:
+      - ros
     privileged: true
     environment:
         - SETUP=/opt/app/catkin_ws/devel/setup.bash
