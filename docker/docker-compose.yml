@@ -1,23 +1,23 @@
 version: "3"
 
 services:
-  ros-melodic:
-    image: "mjpc13/ros:melodic-mynteye"
-    #Mount the src/ folder inside the docker container
-    volumes:
-        - type: bind
-          source: ../catkin_ws/src
-          target: /opt/app/catkin_ws/src
-    network_mode: host
-    privileged: true
-    environment:
-        - SETUP=/opt/app/catkin_ws/devel/setup.bash
-        - BUILDLIST= sensor-tools xsens_driver
-        - ROSPACKAGE=sensor-tools
-        - LAUNCHFILE=apparatus-melodic.launch
-        - XSENS_MODE=sotac #Paramenters related to configuration of Xsens MTi Legacy
-        - XSENS_SETTINGS=tqMAG #Paramenters related to configuration of Xsens MTi Legacy
-    command: ./launch.sh
+  #ros-melodic:
+  #  image: "mjpc13/ros:melodic-mynteye"
+  #  #Mount the src/ folder inside the docker container
+  #  volumes:
+  #      - type: bind
+  #        source: ../catkin_ws/src
+  #        target: /opt/app/catkin_ws/src
+  #  network_mode: host
+  #  privileged: true
+  #  environment:
+  #      - SETUP=/opt/app/catkin_ws/devel/setup.bash
+  #      - BUILDLIST= sensor-tools xsens_driver
+  #      - ROSPACKAGE=sensor-tools
+  #      - LAUNCHFILE=apparatus-melodic.launch
+  #      - XSENS_MODE=sotac #Paramenters related to configuration of Xsens MTi Legacy
+  #      - XSENS_SETTINGS=tqMAG #Paramenters related to configuration of Xsens MTi Legacy
+  #  command: ./launch.sh
   ros-noetic:
     image: "mjpc13/ros:noetic-semfire-apparatus"
     #Mount the src/ folder inside the docker container
