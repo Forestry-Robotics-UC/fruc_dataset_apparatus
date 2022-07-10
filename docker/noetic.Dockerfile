@@ -50,7 +50,9 @@ RUN pip3 install pybind11 \
     catkin_tools;
 
 #Install ROS Packages
-RUN apt-get install -y ros-${ROS_DISTRO}-realsense2-camera ros-${ROS_DISTRO}-rviz
+RUN apt-get install -y ros-${ROS_DISTRO}-realsense2-camera \ 
+    ros-${ROS_DISTRO}-rviz \
+    ros-${ROS_DISTRO}-pcl-ros
 
 # Clean-up
 WORKDIR /
@@ -60,7 +62,11 @@ RUN rm -rf Livox-SDK/
 #Configure catkin workspace
 ENV CATKIN_WS=/root/catkin_ws
 RUN mkdir -p $CATKIN_WS/src
-WORKDIR $CATKIN_WS
+#WORKDIR $CATKIN_WS
+
+# Clean-up
+WORKDIR /
+RUN apt-get clean
 
 #RUN echo "source /usr/local/bin/catkin_entrypoint.sh" >> /root/.bashrc
 COPY noetic-launch.sh /noetic-launch.sh

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-cd /opt/app/catkin_ws/
+cd /root/catkin_ws/
 catkin config --buildlist $BUILDLIST
 catkin build
 
