@@ -1,56 +1,65 @@
 version: "3"
 
+#Create a network that links containers
 networks:
   ros:
     driver: bridge
+      config:
+        - subnet: 172.26.0.0/16
+          gateway: 172.26.0.1
 
 services:
+  #Create a container for the ROS master
   ros-master:
-    image: ros:noetic-ros-core
+    image: mjpc13/ros:noetic-core
     networks:
-      - ros
-    environment:
-      - "ROS_IP=172.19.0.2"
-    command: stdbuf -o L roscore
+      ros:
+        ipv4_address: 172.26.0.2
 
+  #Create the Melodic Container
   ros-melodic:
-    image: "mjpc13/ros:melodic-mynteye"
+    #image: "mjpc13/ros:melodic-mynteye"
+    build:
+      dockerfile: melodic.Dockerfile
     depends_on:
       - ros-master
     #Mount the src/ folder inside the docker container
     volumes:
         - type: bind
           source: ../catkin_ws/src
-          target: /opt/app/catkin_ws/src
+          target: /root/catkin_ws/src
     networks:
       - ros
     privileged: true
     environment:
         - "ROS_MASTER_URI=http://ros-master:11311"
-        - SETUP=/opt/app/catkin_ws/devel/setup.bash
+        - SETUP=/root/catkin_ws/devel/setup.bash
         - BUILDLIST= sensor-tools xsens_driver
         - ROSPACKAGE=sensor-tools
         - LAUNCHFILE=apparatus-melodic.launch
         - XSENS_MODE=sotac #Paramenters related to configuration of Xsens MTi Legacy
         - XSENS_SETTINGS=tqMAG #Paramenters related to configuration of Xsens MTi Legacy
-    command: ./launch.sh
+    command: ./melodic-launch.sh
   
+  ##Create the Noetic Container
   ros-noetic:
-    image: "mjpc13/ros:noetic-semfire-apparatus"
+    #image: "mjpc13/ros:noetic-semfire-apparatus"
+    build:
+      dockerfile: noetic.Dockerfile
     depends_on:
       - ros-master
     #Mount the src/ folder inside the docker container
     volumes:
         - type: bind
           source: ../catkin_ws/src
-          target: /opt/app/catkin_ws/src
+          target: /root/catkin_ws/src
     networks:
       - ros
     privileged: true
     environment:
         - "ROS_MASTER_URI=http://ros-master:11311"
-        - SETUP=/opt/app/catkin_ws/devel/setup.bash
-        - BUILDLIST= sensor-tools livox_ros_driver realsense2_camera #Only this packages will be build 
+        - SETUP=/root/catkin_ws/devel/setup.bash
+        - BUILDLIST= sensor-tools livox_ros_driver realsense2_camera #Only this packages will be build
         - ROSPACKAGE=sensor-tools #rospackage of the desired launchfile
         - LAUNCHFILE=apparatus-noetic.launch #launchfile to be launch after compilation
-    command: ./launch.sh
+    command: ./noetic-launch.sh

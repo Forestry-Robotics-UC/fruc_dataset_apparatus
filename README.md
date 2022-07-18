@@ -14,21 +14,33 @@ export ROS_IP=172.19.0.1 && export ROS_MASTER_URI=http://172.19.0.2:11311
 ```
 
 
-## Tag - mjpc13/ros:melodic-mynteye
+# Services
+
+## ros-master
+
+The core image of ros noetic with ngrok to create the master.
+
+### Software 
+
+- OS: **Ubuntu 20.04**
+- ROS: **Noetic**
+- ngrok 
+
+### Environment Variables
+
+- **NGROK_TOKEN (Optional)**: The ngrok token to set up and connect to ngrok
+
+## ros-melodic
+
+A base image of ros melodic with the software necessary to use the IMU and Mynt Eye camera.
 
 ### Software 
 
 - OS: **Ubuntu 18.04**
 - ROS: **Melodic**
 - OpenCV: **3.4.1** compile from source 
-- PCL: **1.7.2** compiled from source
 - [MYNT SDK](https://github.com/slightech/MYNT-EYE-D-SDK) compiled from source
-- MYNT ROS DRIVER
 - catkin_tools
-
-### Volume
-
-Mount the src/ folder of this repository into "/opt/app/catkin_ws/src"
 
 ### Environment Variables
 
@@ -36,10 +48,10 @@ Mount the src/ folder of this repository into "/opt/app/catkin_ws/src"
 - **BUILDLIST**: Packages to be compiled by catkin_tools
 - **LAUNCHFILE**: The launch file to be executed when running the container
 - **ROSPACKAGE**: The package of the desired launch file
-- **XSENS_MODE**: Paramenters related to configuration of Xsens MTi Legacy
-- **XSENS_SETTINGS**: Paramenters related to configuration of Xsens MTi Legacy
+- **XSENS_MODE**: Paramenters related to configuration of the IMU Xsens MTi Legacy (see options below)
+- **XSENS_SETTINGS**: Paramenters related to configuration of the IMU Xsens MTi Legacy (see options below)
 
-#### Xsens Options
+#### Xsense Options
 
 Xsens allows configuration of their devices these environments change the configuration of the Legacy devices.
 
@@ -68,25 +80,9 @@ Xsens allows configuration of their devices these environments change the config
 	- j only analog input 2 (excludes 'i')
 	- N North-East-Down instead of default: X North Z up
 
-### Run Script
+## ros-noetic
 
-```bash
-#!/bin/bash
-set -e
-
-#Configure the Xsens IMU
-python /opt/app/catkin_ws/src/depends/ethzasl_xsens_driver/nodes/mtdevice.py -l --output-mode=$XSENS_MODE --output-settings=$XSENS_SETTINGS
-
-#Build the catkin workspace
-cd /opt/app/catkin_ws
-catkin config --extend /opt/app/MYNT-EYE-S-SDK/wrappers/ros/devel --buildlist $BUILDLIST #only builds these packages
-catkin build -v
-source $SETUP
-
-roslaunch $ROSPACKAGE $LAUNCHFILE #launch the file
-```
-
-## Tag -  mjpc13/ros:noetic-semfire-apparatus
+A base noetic image with the software necessary to use the Livox LiDAR and the Intel RealSense camera
 
 ### Software 
 
@@ -94,37 +90,12 @@ roslaunch $ROSPACKAGE $LAUNCHFILE #launch the file
 - ROS: **Noetic**
 - [librealsense2](https://github.com/IntelRealSense/librealsense/releases/tag/v2.50.0)
 - [realsense-ros ](https://github.com/IntelRealSense/realsense-ros) wrapper
+- Livox-SDK
 - catkin_tools
 
-### Volume
-
-Mount the src/ folder of this repository into "/opt/app/catkin_ws/src"
-
-### Environment Variables
+## Environment Variables
 
 - **SETUP**: The path for the setup.bash file used in the source. default: "opt/ros/$ROS_DISTRO/devel/setup.bash"
 - **BUILDLIST**: Packages to be compiled by catkin_tools
 - **LAUNCHFILE**: The launch file to be executed when running the container
 - **ROSPACKAGE**: The package of the desired launch file
-
-### Run Script
-
-The default script to be run is the ``launch.sh``
-```bash
-#!/bin/bash
-set -e
-
-cd /opt/app/catkin_ws/
-catkin config --buildlist $BUILDLIST
-catkin build
-
-# setup ros environment
-if [ -z "${SETUP}" ]; then
-        # basic ros environment
-	source "/opt/ros/$ROS_DISTRO/setup.bash"
-else
-       #from environment variable; should be a absolute path to the appropriate workspaces's setup.bash
-        source $SETUP
-fi
-roslaunch $ROSPACKAGE $LAUNCHFILE
-```
