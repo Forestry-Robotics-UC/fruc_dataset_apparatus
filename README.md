@@ -8,6 +8,11 @@ To run the apparatus with docker just run:
 cd docker/
 docker compose up
 ```
+To connect the **host** computer to the **ROS master** running inside the containers execute the following commands in the terminal:
+```bash
+export ROS_IP=172.19.0.1 && export ROS_MASTER_URI=http://172.19.0.2:11311
+```
+
 
 # Services
 
