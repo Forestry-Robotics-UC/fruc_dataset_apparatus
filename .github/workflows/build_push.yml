@@ -28,7 +28,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: melodic.Dockerfile
+          file: docker/melodic.Dockerfile
           push: true
           platforms: linux/amd64, linux/arm/v7, linux/arm64
           tags: ${{secrets.DOCKER_USERNAME}}/fruc:apparatus-melodic
@@ -37,7 +37,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: noetic.Dockerfile
+          file: docker/noetic.Dockerfile
           push: true
           platforms: linux/amd64, linux/arm/v7, linux/arm64
           tags: ${{secrets.DOCKER_USERNAME}}/fruc:apparatus-noetic
