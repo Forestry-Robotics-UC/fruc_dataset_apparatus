@@ -6,12 +6,13 @@ on:
       - 'v*' # Push events to matching v* (eg. v0.0.0)
   workflow_dispatch:
 
+defaults:
+  run:
+    working-directory: docker
+
 jobs:
   build:
     runs-on: ubuntu-20.04
-    defaults:
-      run:
-        working-directory: docker
 
     steps:
       - name: checkout code
@@ -28,7 +29,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: docker/melodic.Dockerfile
+          file: melodic.Dockerfile
           push: true
           platforms: linux/amd64, linux/arm/v7, linux/arm64
           tags: ${{secrets.DOCKER_USERNAME}}/fruc:apparatus-melodic
@@ -37,7 +38,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: docker/noetic.Dockerfile
+          file: noetic.Dockerfile
           push: true
           platforms: linux/amd64, linux/arm/v7, linux/arm64
           tags: ${{secrets.DOCKER_USERNAME}}/fruc:apparatus-noetic
