@@ -1,4 +1,5 @@
 ARG ARCH=
+ARG CORES=2
 FROM ${ARCH}ros:noetic-ros-base
 
 LABEL maintainer="Mario Cristovao <mjpc13@protonmail.com>"
@@ -34,7 +35,7 @@ RUN apt-get update \
 RUN apt install cmake
 RUN git clone https://github.com/Livox-SDK/Livox-SDK.git
 WORKDIR /Livox-SDK/build
-RUN cmake .. && make install
+RUN cmake .. && make -j ${CORES} install
 
 # Install some python packages
 RUN apt-get -y install \

@@ -1,4 +1,5 @@
 ARG ARCH=
+ARG CORES=2
 FROM ${ARCH}ros:melodic-ros-base
 
 LABEL maintainer="Mario Cristovao <mjpc13@protonmail.com>"
@@ -59,7 +60,7 @@ RUN cmake \
         -DBUILD_TESTS=OFF \
         -DBUILD_PERF_TESTS=OFF \
         ..
-RUN make install
+RUN make -j ${CORES} install
 ENV OpenCV_DIR=/root/opencv
 
 #Install Mynt Eye SDK
