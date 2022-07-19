@@ -4,6 +4,7 @@ version: "3"
 networks:
   ros:
     driver: bridge
+    ipam:
       config:
         - subnet: 172.26.0.0/16
           gateway: 172.26.0.1
@@ -20,6 +21,7 @@ services:
   ros-melodic:
     #image: "mjpc13/ros:melodic-mynteye"
     build:
+      context: .
       dockerfile: melodic.Dockerfile
     depends_on:
       - ros-master
@@ -45,6 +47,7 @@ services:
   ros-noetic:
     #image: "mjpc13/ros:noetic-semfire-apparatus"
     build:
+      context: .
       dockerfile: noetic.Dockerfile
     depends_on:
       - ros-master
