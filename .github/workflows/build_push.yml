@@ -12,7 +12,7 @@ defaults:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-20.04 #Runs in ubuntu-20.04
 
     steps:
       - name: checkout code
@@ -27,15 +27,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       
-      - name: Build and push Melodic Image
-        uses: docker/build-push-action@v2
-        with:
-          context: ./docker
-          file: docker/melodic.Dockerfile
-          push: true
-          platforms: linux/amd64, linux/arm64
-          tags: ${{secrets.DOCKER_USERNAME}}/fruc:apparatus-melodic
-      
       - name: Build and push Noetic Image
         uses: docker/build-push-action@v2
         with:
@@ -44,3 +35,12 @@ jobs:
           push: true
           platforms: linux/amd64, linux/arm64
           tags: ${{secrets.DOCKER_USERNAME}}/fruc:apparatus-noetic
+      
+      - name: Build and push Melodic Image
+        uses: docker/build-push-action@v2
+        with:
+          context: ./docker
+          file: docker/melodic.Dockerfile
+          push: true
+          platforms: linux/amd64, linux/arm64
+          tags: ${{secrets.DOCKER_USERNAME}}/fruc:apparatus-melodic
