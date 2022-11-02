@@ -36,7 +36,6 @@ RUN apt-get -y install \
 RUN pip install pybind11 \
     catkin_tools;
 
-
 # --- INSTALL MYNT EYE SDK ---
 #Install OpenCV dependencies
 RUN apt-get -y install pkg-config libgtk2.0-dev
@@ -44,7 +43,7 @@ RUN apt-get -y install pkg-config libgtk2.0-dev
 #Install ssl for https, v4l for video
 RUN apt-get -y install libssl-dev libv4l-dev v4l-utils
 
-#Install OpenCV
+#Install OpenCV, Mynt Eye requires the 3.4.0 version of OpenCV
 WORKDIR /root
 RUN git clone https://github.com/opencv/opencv.git
 WORKDIR /root/opencv
@@ -69,12 +68,11 @@ RUN git clone https://github.com/slightech/MYNT-EYE-S-SDK.git
 WORKDIR /root/MYNT-EYE-S-SDK/
 RUN make init
 RUN make install
+
 #Install ROS Packages
 RUN apt-get install -y ros-${ROS_DISTRO}-rviz ros-${ROS_DISTRO}-cv-bridge
 RUN source ${ROS_ROOT}/setup.bash && make ros 
 #---
-
-
 
 #Configure catkin workspace
 ENV CATKIN_WS=/root/catkin_ws
