@@ -13,4 +13,4 @@ else
        #from environment variable; should be a absolute path to the appropriate workspaces's setup.bash
         source $SETUP
 fi
-roslaunch $ROSPACKAGE $LAUNCHFILE
+roslaunch --wait $ROSPACKAGE $LAUNCHFILE

@@ -14,6 +14,6 @@
 	<include file="$(find livox_ros_driver)/launch/livox_lidar.launch">
 		<arg name="msg_frame_id" value="map"/>
 	</include>
-	<node pkg="tf" type="static_transform_publisher" name="realsense2map" args="0.0 0.0 0.0 0.0 0.0 0.0 realsense_depth_optical_frame map 40"/>
+	/* <node pkg="tf" type="static_transform_publisher" name="realsense2map" args="0.0 0.0 0.0 0.0 0.0 0.0 realsense_depth_optical_frame map 40"/> */
 
 </launch>

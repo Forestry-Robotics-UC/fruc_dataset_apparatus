@@ -10,4 +10,4 @@ catkin config --extend /root/MYNT-EYE-S-SDK/wrappers/ros/devel --whitelist $BUIL
 catkin build -v
 source $SETUP
 
-roslaunch $ROSPACKAGE $LAUNCHFILE #launch the file
+roslaunch --wait $ROSPACKAGE $LAUNCHFILE #launch the file

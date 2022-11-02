@@ -12,7 +12,7 @@
 	<include file="$(find xsens_driver)/launch/xsens_driver.launch" >
 		<arg name="frame_id" value="xsens_frame" />
 	</include>
-	<node pkg="tf" type="static_transform_publisher" name="xsense2imu" args="0.0 0.0 0.0 0.0 0.0 0.0 xsens_frame camera_imu_frame 40"/>
-	<node pkg="tf" type="static_transform_publisher" name="mynt2map" args="0.0 0.0 0.0 0.0 0.0 0.0 mynteye_points_frame map 40"/>
+	/* <node pkg="tf" type="static_transform_publisher" name="xsense2imu" args="0.0 0.0 0.0 0.0 0.0 0.0 xsens_frame camera_imu_frame 40"/> */
+	/* <node pkg="tf" type="static_transform_publisher" name="mynt2map" args="0.0 0.0 0.0 0.0 0.0 0.0 mynteye_points_frame map 40"/> */
 
 </launch>

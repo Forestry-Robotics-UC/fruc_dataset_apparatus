@@ -13,13 +13,15 @@ services:
   #Create a container for the ROS master
   ros-master:
     image: mjpc13/ros:noetic-core
+    environment:
+      - "NGROK_TOKEN=2BiPwHCFJsp78nQ5THtqjJeoNXH_6pVfrEahTThxPm56HEM21"
     networks:
       ros:
         ipv4_address: 172.26.0.2
-
-  #Create the Melodic Container
+    command: roscore
+    
+  #Create the Melodic Container (required by Mynt Eye)
   ros-melodic:
-    #image: "mjpc13/ros:melodic-mynteye"
     build:
       context: .
       dockerfile: melodic.Dockerfile
@@ -45,13 +47,11 @@ services:
   
   ##Create the Noetic Container
   ros-noetic:
-    #image: "mjpc13/ros:noetic-semfire-apparatus"
     build:
       context: .
       dockerfile: noetic.Dockerfile
     depends_on:
       - ros-master
-    #Mount the src/ folder inside the docker container
     volumes:
         - type: bind
           source: ../catkin_ws/src
@@ -66,3 +66,43 @@ services:
         - ROSPACKAGE=sensor-tools #rospackage of the desired launchfile
         - LAUNCHFILE=apparatus-noetic.launch #launchfile to be launch after compilation
     command: ./noetic-launch.sh
+  
+  #Ros bridge container ( creates a websocket server to connect Android devices)
+  ros-bridge:
+    image: mjpc13/ros:noetic-base
+    depends_on:
+      - ros-master
+    networks:
+      ros:
+        ipv4_address: 172.26.0.9
+    ports: #Exposes the 9090 port to the host computer, so it can be reached from external devices
+      - "9090:9090" 
+    environment:
+        - "ROS_MASTER_URI=http://ros-master:11311"
+        - "ROS_IP=172.26.0.9"
+        - SETUP=/root/catkin_ws/devel/setup.bash
+    command: roslaunch --wait rosbridge_server rosbridge_websocket.launch    
+  
+  #Vizualization Container
+  viz:
+    image: osrf/ros:noetic-desktop-full
+    container_name: ros_visualizer
+    depends_on:
+      - ros-master
+    networks:
+      - ros
+    environment:
+      - "ROS_MASTER_URI=http://ros-master:11311"
+      - "DISPLAY"
+      - "QT_X11_NO_MITSHM=1" #fix some QT bugs
+    user: 1000:1000 #adapt as needed!
+    volumes: 
+      #share your x11 socket and permissions to the container
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /etc/group:/etc/group:ro
+      - /etc/passwd:/etc/passwd:ro
+      - /etc/shadow:/etc/shadow:ro
+      - /etc/sudoers:/etc/sudoers:ro
+      - /etc/sudoers.d:/etc/sudoers.d:ro
+      - /home/mjpc13:/home/mjpc13:rw #share your home with write permissions
+    command: rqt
