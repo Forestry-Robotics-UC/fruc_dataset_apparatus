@@ -6,6 +6,8 @@
 		<arg name="enable_infra2" value="true"/>
 		<arg name="enable_gyro" value="true"/>
 		<arg name="enable_accel" value="true"/>
+		<arg name="accel_fps" default="250" />
+		<arg name="gyro_fps" default="200" />
 		<arg name="enable_pointcloud" value="true"/>
 	</include>
 
