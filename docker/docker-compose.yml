@@ -85,7 +85,7 @@ services:
   
   #Vizualization Container
   viz:
-    image: osrf/ros:noetic-desktop-full
+    image: osrf/ros:kinetic-desktop-full
     container_name: ros_visualizer
     depends_on:
       - ros-master
@@ -105,4 +105,5 @@ services:
       - /etc/sudoers:/etc/sudoers:ro
       - /etc/sudoers.d:/etc/sudoers.d:ro
       - /home/mjpc13:/home/mjpc13:rw #share your home with write permissions
+      - ../rviz:/rviz/:ro #Pass the Rviz config files
     command: rqt

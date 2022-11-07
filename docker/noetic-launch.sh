@@ -6,11 +6,13 @@ catkin config --buildlist $BUILDLIST
 catkin build
 
 # setup ros environment
-if [ -z "${SETUP}" ]; then
-        # basic ros environment
-	source "/opt/ros/$ROS_DISTRO/setup.bash"
+if [[ ! -z "${SETUP}" ]]; then
+        #from environment variable; should be a absolute path to the appropriate workspaces's setup.bash
+        echo "source env is set to '$SETUP'"
 else
-       #from environment variable; should be a absolute path to the appropriate workspaces's setup.bash
-        source $SETUP
+        # basic ros environment
+	export SETUP="/opt/ros/$ROS_DISTRO/setup.bash"
+        echo "source env is set to '/opt/ros/$ROS_DISTRO/setup.bash'"
 fi
+source $SETUP
 roslaunch --wait $ROSPACKAGE $LAUNCHFILE
