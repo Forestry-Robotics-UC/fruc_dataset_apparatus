@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<robot name="mynteye_S1030">
+  
+  <!-- ..Material Definitions.. -->
+  <material name="black">
+    <color rgba="0 0 0 1"/>
+  </material>
+
+  <material name="white">
+    <color rgba="1 1 1 1"/>
+  </material>
+  
+  <!-- SENSOR BOX KIT -->
+
+    <link name="mynteye_link" > <!--REFERENCE FRAME FOR THE SENSING KIT!-->
+        <visual>      
+         	<origin
+            xyz="0 0 0"
+            rpy="0 0 0" />
+          <geometry>
+	          <mesh filename="file:///rviz/mesh/S1030-0315.obj" scale="0.001 0.001 0.001"/>
+          </geometry>
+          <material name="white"/>
+        </visual>
+    </link>  
+
+</robot>

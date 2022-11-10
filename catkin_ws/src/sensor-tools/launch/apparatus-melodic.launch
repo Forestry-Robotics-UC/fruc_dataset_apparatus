@@ -1,4 +1,7 @@
 <launch>
+
+	<arg name="model" default="$(find sensor-tools)/urdf/mynteye_S3010.urdf"/>
+
 	<!--  Remap topics from XSENS IMU Driver -->
 	<remap from="velocity" to="imu/velocity"/>
 	<remap from="analog_in1" to="imu/analog_in1"/>
@@ -8,11 +11,17 @@
 	<remap from="temperature" to="imu/temperature"/>
 	<remap from="imu_data_str" to="imu/imu_data_str"/>
 
-	<include file="$(find mynt_eye_ros_wrapper)/launch/mynteye.launch" />
+	<include file="$(find mynt_eye_ros_wrapper)/launch/laserscan/mynteye_s1030_laserscan.launch" >
+		<arg name="mesh_file" value="/rviz/mesh/S1030-0315.obj" />
+	</include>
 	<include file="$(find xsens_driver)/launch/xsens_driver.launch" >
 		<arg name="frame_id" value="xsens_frame" />
 	</include>
-	/* <node pkg="tf" type="static_transform_publisher" name="xsense2imu" args="0.0 0.0 0.0 0.0 0.0 0.0 xsens_frame camera_imu_frame 40"/> */
-	/* <node pkg="tf" type="static_transform_publisher" name="mynt2map" args="0.0 0.0 0.0 0.0 0.0 0.0 mynteye_points_frame map 40"/> */
+
+	<!--<param name="robot_description" textfile="$(arg model)" />
+	<node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
+            <remap from="joint_state" to="joint_state"/>
+            <param name="publish_frequency" type="double" value="15.0"/>
+    </node>-->
 
 </launch>
