@@ -4,13 +4,13 @@
 
 	<include file="$(find realsense2_camera)/launch/rs_camera.launch">
 		<arg name="camera" value="realsense"/>
-		<arg name="enable_infra" value="true"/>
-		<arg name="enable_infra1" value="true"/>
-		<arg name="enable_infra2" value="true"/>
-		<arg name="enable_gyro" value="true"/>
-		<arg name="enable_accel" value="true"/>
-		<arg name="accel_fps" default="150" />
-		<arg name="gyro_fps" default="100" />
+		<arg name="enable_infra" value="false"/>
+		<arg name="enable_infra1" value="false"/>
+		<arg name="enable_infra2" value="false"/>
+		<arg name="enable_gyro" value="false"/>
+		<arg name="enable_accel" value="false"/>
+		<arg name="accel_fps" value="150" />
+		<arg name="gyro_fps" value="100" />
 		<arg name="enable_pointcloud" value="true"/>
 		<arg name="initial_reset" value="false"/>
 	</include>

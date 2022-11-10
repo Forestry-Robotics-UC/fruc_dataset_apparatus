@@ -11,9 +11,12 @@
 	<remap from="temperature" to="imu/temperature"/>
 	<remap from="imu_data_str" to="imu/imu_data_str"/>
 
-	<include file="$(find mynt_eye_ros_wrapper)/launch/laserscan/mynteye_s1030_laserscan.launch" >
+	<!--<include file="$(find mynt_eye_ros_wrapper)/launch/laserscan/mynteye_s1030_laserscan.launch" >
 		<arg name="mesh_file" value="/rviz/mesh/S1030-0315.obj" />
-	</include>
+	</include>-->
+
+	<include file="$(find mynt_eye_ros_wrapper)/launch/mynteye.launch" />
+
 	<include file="$(find xsens_driver)/launch/xsens_driver.launch" >
 		<arg name="frame_id" value="xsens_frame" />
 	</include>
