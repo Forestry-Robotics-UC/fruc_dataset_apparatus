@@ -35,7 +35,7 @@
   <arg name="filters"                   default=""/>rs
   <arg name="tf_publish_rate"           default="0"/>
   <arg name="clip_distance"             default="-2"/>
-  <arg name="initial_reset"             default="true"/>
+  <arg name="initial_reset"             default="false"/>
 
   <include file="$(find realsense2_camera)/launch/rs_camera.launch">
     <arg name="output"                          default="$(arg output)"/>

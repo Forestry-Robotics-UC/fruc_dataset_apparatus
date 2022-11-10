@@ -18,6 +18,9 @@ services:
     networks:
       ros:
         ipv4_address: 172.26.0.2
+    environment:
+        - "ROS_MASTER_URI=http://ros-master:11311"
+        - "ROS_IP=172.26.0.2"
     command: roscore
     
   #Create the Melodic Container (required by Mynt Eye)
@@ -27,16 +30,18 @@ services:
       dockerfile: melodic.Dockerfile
     depends_on:
       - ros-master
+    privileged: true
     #Mount the src/ folder inside the docker container
     volumes:
         - type: bind
           source: ../catkin_ws/src
           target: /root/catkin_ws/src
     networks:
-      - ros
-    privileged: true
+      ros:
+        ipv4_address: 172.26.0.3
     environment:
         - "ROS_MASTER_URI=http://ros-master:11311"
+        - "ROS_IP=172.26.0.3"
         - SETUP=/root/catkin_ws/devel/setup.bash
         - BUILDLIST= sensor-tools xsens_driver
         - ROSPACKAGE=sensor-tools
@@ -52,15 +57,17 @@ services:
       dockerfile: noetic.Dockerfile
     depends_on:
       - ros-master
+    privileged: true
     volumes:
         - type: bind
           source: ../catkin_ws/src
           target: /root/catkin_ws/src
     networks:
-      - ros
-    privileged: true
+      ros:
+        ipv4_address: 172.26.0.4
     environment:
         - "ROS_MASTER_URI=http://ros-master:11311"
+        - "ROS_IP=172.26.0.4"
         - SETUP=/root/catkin_ws/devel/setup.bash
         - BUILDLIST= sensor-tools livox_ros_driver realsense2_camera #Only this packages will be build
         - ROSPACKAGE=sensor-tools #rospackage of the desired launchfile
@@ -74,14 +81,30 @@ services:
       - ros-master
     networks:
       ros:
-        ipv4_address: 172.26.0.9
+        ipv4_address: 172.26.0.5
     ports: #Exposes the 9090 port to the host computer, so it can be reached from external devices
       - "9090:9090" 
     environment:
         - "ROS_MASTER_URI=http://ros-master:11311"
-        - "ROS_IP=172.26.0.9"
+        - "ROS_IP=172.26.0.5"
         - SETUP=/root/catkin_ws/devel/setup.bash
     command: roslaunch --wait rosbridge_server rosbridge_websocket.launch    
+
+    #  record:
+    #image: ros:noetic-ros-core
+    #depends_on: 
+    #  - ros-master
+    #volumes:
+    #    - type: bind
+    #      source: ../rosbags
+    #      target: /rosbags/
+    #networks:
+    #  ros:
+    #    ipv4_address: 172.26.0.6
+    #environment:
+    #    - "ROS_MASTER_URI=http://ros-master:11311"
+    #    - "ROS_IP=172.26.0.6"
+    #command: rosbag record -a --split --duration=10 -O /rosbags/battery_test.bag
   
   #Vizualization Container
   viz:
@@ -90,9 +113,11 @@ services:
     depends_on:
       - ros-master
     networks:
-      - ros
+      ros:
+        ipv4_address: 172.26.0.7
     environment:
       - "ROS_MASTER_URI=http://ros-master:11311"
+      - "ROS_IP=172.26.0.7"
       - "DISPLAY"
       - "QT_X11_NO_MITSHM=1" #fix some QT bugs
     user: 1000:1000 #adapt as needed!
@@ -104,5 +129,5 @@ services:
       - /etc/shadow:/etc/shadow:ro
       - /etc/sudoers:/etc/sudoers:ro
       - /etc/sudoers.d:/etc/sudoers.d:ro
-      - /home/mjpc13:/home/mjpc13:rw #share your home with write permissions
+      - /home/bolt:/home/bolt:rw #share your home with write permissions
     command: rqt
