@@ -53,7 +53,7 @@ RUN pip3 install pybind11 \
 #Install ROS Packages
 RUN apt-get install -y ros-${ROS_DISTRO}-realsense2-camera \ 
     ros-${ROS_DISTRO}-realsense2-description \ 
-    ros-${ROS_DISTRO}-rviz \
+    ros-${ROS_DISTRO}-xacro \
     ros-${ROS_DISTRO}-pcl-ros
 
 # Clean-up
