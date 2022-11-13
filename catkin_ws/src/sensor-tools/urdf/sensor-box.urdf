@@ -87,18 +87,6 @@
       <child link="mynteye_link"/>
     </joint>
 
-
-    <!--<joint name="base_sensor_box_to_mynt_bottom_screw" type="fixed">
-        <parent link="base_sensor_box" />
-        <child link="mynteye_bottom_screw_frame"/>
-        <origin rpy="0 0 <1.5708>" xyz="-0.0015 0.035 0.144" /> 
-    </joint>-->
-    <!--<joint name="mynt_bottom_link_to_mynt_link" type="fixed">
-      <origin xyz="0.0105 0.0628 0.01573" rpy="3.1415 -1.5708 0" />
-      <parent link="mynteye_bottom_screw_frame" />
-      <child link="mynteye_link"/>
-    </joint>-->
-
     <!-- LIVOX MID-70 LINK-->
     <joint name="base_sensor_box_to_livox" type="fixed">
         <parent link="base_sensor_box" />
