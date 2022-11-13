@@ -5,9 +5,10 @@ services:
   #Create a container for the ROS master
   ros-master:
     image: mjpc13/ros:noetic-core
-    network_mode: "host"
+    env_file: .env
     environment:
-      - "NGROK_TOKEN=2BiPwHCFJsp78nQ5THtqjJeoNXH_6pVfrEahTThxPm56HEM21"
+      - NGROK_TOKEN=$NGROK_TOKEN
+    network_mode: "host"
     command: roscore
     
   #Create the Melodic Container (required by Mynt Eye)
@@ -24,6 +25,7 @@ services:
         - type: bind
           source: ../catkin_ws/src
           target: /root/catkin_ws/src
+    network_mode: "host"
     environment:
         - SETUP=/root/catkin_ws/devel/setup.bash
         - BUILDLIST= sensor-tools xsens_driver
@@ -46,6 +48,7 @@ services:
         - type: bind
           source: ../catkin_ws/src
           target: /root/catkin_ws/src
+    network_mode: "host"
     environment:
         - SETUP=/root/catkin_ws/devel/setup.bash
         - BUILDLIST= sensor-tools livox_ros_driver realsense2_camera #Only this packages will be build
@@ -59,6 +62,7 @@ services:
     network_mode: "host"
     depends_on:
       - ros-master
+    network_mode: "host"
     ports: #Exposes the 9090 port to the host computer, so it can be reached from external devices
       - "9090:9090" 
     environment:
@@ -78,23 +82,24 @@ services:
   
   #Vizualization Container
   viz:
-      image: osrf/ros:kinetic-desktop-full
-      container_name: ros_visualizer
-      network_mode: "host"
-      depends_on:
-          - ros-master
-      environment:
-          - "DISPLAY"
-          - "QT_X11_NO_MITSHM=1" #fix some QT bugs
-      user: 1000:1000 #adapt as needed!
-      volumes: 
-  ##share your x11 socket and permissions to the container
-          - /tmp/.X11-unix:/tmp/.X11-unix:rw
-          - /etc/group:/etc/group:ro
-          - /etc/passwd:/etc/passwd:ro
-          - /etc/shadow:/etc/shadow:ro
-          - /etc/sudoers:/etc/sudoers:ro
-          - /etc/sudoers.d:/etc/sudoers.d:ro
-          - /home/bolt:/home/bolt:rw #share your home with write permissions
-          - ../rviz:/rviz/:rw #Pass the Rviz config files
-      command: rqt
+    image: osrf/ros:kinetic-desktop-full
+    container_name: ros_visualizer
+    depends_on:
+      - ros-master
+    network_mode: "host"
+    environment:
+      - "DISPLAY"
+      - "QT_X11_NO_MITSHM=1" #fix some QT bugs
+    user: 1000:1000 #adapt as needed!
+    env_file: .env
+    volumes: 
+      #share your x11 socket and permissions to the container
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /etc/group:/etc/group:ro
+      - /etc/passwd:/etc/passwd:ro
+      - /etc/shadow:/etc/shadow:ro
+      - /etc/sudoers:/etc/sudoers:ro
+      - /etc/sudoers.d:/etc/sudoers.d:ro
+      - /home/$USER:/home/$USER:rw #share your home with write permissions
+      - ../rviz:/rviz/:rw #Pass the Rviz config files
+    command: rqt
