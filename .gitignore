@@ -178,6 +178,7 @@ dmypy.json
 
 # ROSBags
 *.bag
+*.active
 
 # Velodyne Files
 *.pcap
