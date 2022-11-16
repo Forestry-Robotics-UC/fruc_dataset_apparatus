@@ -74,11 +74,13 @@ services:
     network_mode: "host"
     depends_on: 
       - ros-master
+    environment:
+      - TOPICS=$TOPICS
     volumes:
         - type: bind
           source: ../rosbags
           target: /rosbags/
-    command: rosbag record -a --split --size=1024 --max-split 3 -O /rosbags/tf_align.bag
+    command: rosbag record --split --size=1024 --max-split 3 -O /rosbags/tf_align.bag $TOPICS
   
   #Vizualization Container
   viz:
