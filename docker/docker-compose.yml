@@ -80,7 +80,7 @@ services:
         - type: bind
           source: ../rosbags
           target: /rosbags/
-    command: rosbag record --split --size=1024 --max-split 3 -O /rosbags/tf_align.bag $TOPICS
+    command: rosbag record --split --size=5120 --max-split 25 -O /rosbags/DEEC_l0_record.bag $TOPICS
   
   #Vizualization Container
   viz:
