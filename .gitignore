@@ -177,6 +177,7 @@ dmypy.json
 .vscode/
 
 # ROSBags
+rosbags/
 *.bag
 *.active
 
