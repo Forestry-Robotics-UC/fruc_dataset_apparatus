@@ -5,8 +5,8 @@
 	<include file="$(find realsense2_camera)/launch/rs_camera.launch">
 		<arg name="camera" value="realsense"/>
 		<arg name="enable_infra" value="true"/>
-		<arg name="infra_fps" value="10"/>
-		<arg name="color_fps" value="10"/>
+		<arg name="infra_fps" value="15"/>
+		<arg name="color_fps" value="15"/>
 		<arg name="enable_infra1" value="true"/>
 		<arg name="enable_infra2" value="false"/>
 		<arg name="enable_gyro" value="true"/>

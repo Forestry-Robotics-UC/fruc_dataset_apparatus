@@ -32,7 +32,7 @@ RUN apt-get update \
     librealsense2-dbg
 
 #Instal Livox SDK
-RUN apt install cmake
+RUN apt install -y cmake
 RUN git clone https://github.com/Livox-SDK/Livox-SDK.git
 WORKDIR /Livox-SDK/build
 RUN cmake .. && make -j ${CORES} install
@@ -55,7 +55,8 @@ RUN apt-get install -y ros-${ROS_DISTRO}-realsense2-camera \
     ros-${ROS_DISTRO}-realsense2-description \ 
     ros-${ROS_DISTRO}-xacro \
     ros-${ROS_DISTRO}-robot-state-publisher \
-    ros-${ROS_DISTRO}-pcl-ros
+    ros-${ROS_DISTRO}-pcl-ros \
+    ros-${ROS_DISTRO}-image-transport-plugins
 
 # Clean-up
 WORKDIR /

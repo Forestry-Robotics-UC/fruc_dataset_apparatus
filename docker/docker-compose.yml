@@ -5,7 +5,7 @@ services:
   #Create a container for the ROS master
   ros-master:
     image: mjpc13/ros:noetic-core
-    env_file: .env
+    #env_file: .env
     environment:
       - NGROK_TOKEN=$NGROK_TOKEN
     network_mode: "host"
@@ -74,34 +74,35 @@ services:
     network_mode: "host"
     depends_on: 
       - ros-master
+    env_file: .env-pc_register
     environment:
       - TOPICS=$TOPICS
     volumes:
         - type: bind
           source: ../rosbags
           target: /rosbags/
-    command: rosbag record --split --size=5120 --max-split 2 -O /rosbags/sensor_registry.bag $TOPICS
+    command: rosbag record --split --size=5120 --max-split 4 -O /rosbags/pc_register.bag $TOPICS
   
   #Vizualization Container
-  viz:
-    image: osrf/ros:kinetic-desktop-full
-    container_name: ros_visualizer
-    depends_on:
-      - ros-master
-    network_mode: "host"
-    environment:
-      - "DISPLAY"
-      - "QT_X11_NO_MITSHM=1" #fix some QT bugs
-    user: 1000:1000 #adapt as needed!
-    env_file: .env
-    volumes: 
-      #share your x11 socket and permissions to the container
-      - /tmp/.X11-unix:/tmp/.X11-unix:rw
-      - /etc/group:/etc/group:ro
-      - /etc/passwd:/etc/passwd:ro
-      - /etc/shadow:/etc/shadow:ro
-      - /etc/sudoers:/etc/sudoers:ro
-      - /etc/sudoers.d:/etc/sudoers.d:ro
-      - /home/$USER:/home/$USER:rw #share your home with write permissions
-      - ../rviz:/rviz/:rw #Pass the Rviz config files
-    command: rqt
+  #  viz:
+  #  image: osrf/ros:kinetic-desktop-full
+  #  container_name: ros_visualizer
+  #  depends_on:
+  #    - ros-master
+  #  network_mode: "host"
+  #  environment:
+  #    - "DISPLAY"
+  #    - "QT_X11_NO_MITSHM=1" #fix some QT bugs
+  #  user: 1000:1000 #adapt as needed!
+  #  env_file: .env
+  #  volumes: 
+  #    #share your x11 socket and permissions to the container
+  #    - /tmp/.X11-unix:/tmp/.X11-unix:rw
+  #    - /etc/group:/etc/group:ro
+  #    - /etc/passwd:/etc/passwd:ro
+  #    - /etc/shadow:/etc/shadow:ro
+  #    - /etc/sudoers:/etc/sudoers:ro
+  #    - /etc/sudoers.d:/etc/sudoers.d:ro
+  #    - /home/$USER:/home/$USER:rw #share your home with write permissions
+  #    - ../rviz:/rviz/:rw #Pass the Rviz config files
+  #  command: rqt
