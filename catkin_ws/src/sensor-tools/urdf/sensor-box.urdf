@@ -82,7 +82,7 @@
     </joint>
 
     <joint name="mynt_bottom_link_to_mynt_link" type="fixed">
-      <origin xyz="0.0 0.01 0.0136" rpy="0 0 0.91" />
+      <origin xyz="0.0 0.01 0.0136" rpy="0 0 0.78" />
       <parent link="mynteye_bottom_screw_frame" />
       <child link="mynteye_link"/>
     </joint>
