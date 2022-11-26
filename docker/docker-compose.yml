@@ -74,14 +74,14 @@ services:
     network_mode: "host"
     depends_on: 
       - ros-master
-    env_file: .env-pc_register
+    env_file: .env
     environment:
       - TOPICS=$TOPICS
     volumes:
         - type: bind
           source: ../rosbags
           target: /rosbags/
-    command: rosbag record --split --size=5120 --max-split 4 -O /rosbags/pc_register.bag $TOPICS
+    command: rosbag record --split --size=15120 --max-split 20 -O /rosbags/piso21_slam.bag $TOPICS
   
   #Vizualization Container
   #  viz:
