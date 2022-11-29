@@ -17,10 +17,4 @@
 		<arg name="frame_id" value="xsens_frame" />
 	</include>
 
-	<!--<param name="robot_description" textfile="$(arg model)" />
-	<node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
-            <remap from="joint_state" to="joint_state"/>
-            <param name="publish_frequency" type="double" value="15.0"/>
-    </node>-->
-
 </launch>
