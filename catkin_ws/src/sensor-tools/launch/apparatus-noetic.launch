@@ -19,6 +19,7 @@
 
 	<include file="$(find livox_ros_driver)/launch/livox_lidar.launch">
 		<arg name="msg_frame_id" value="livox_frame"/>
+		<arg name="publish_freq" value="50"/>
 		<!--<arg name="bd_list" value="3GGDJ2Q00100941"/>-->
 	</include>
 
