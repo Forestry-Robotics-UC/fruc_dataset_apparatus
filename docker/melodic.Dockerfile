@@ -73,8 +73,7 @@ RUN make install
 RUN apt-get install -y ros-${ROS_DISTRO}-rviz \
     ros-${ROS_DISTRO}-cv-bridge \
     ros-${ROS_DISTRO}-xacro \
-    ros-${ROS_DISTRO}-robot-state-publisher 
-#    ros-${ROS_DISTRO}-image-transport-plugins
+    ros-${ROS_DISTRO}-image-transport-plugins
 
 RUN source ${ROS_ROOT}/setup.bash && make ros 
 #---
