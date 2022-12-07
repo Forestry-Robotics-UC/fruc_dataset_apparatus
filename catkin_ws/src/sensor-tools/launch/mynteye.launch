@@ -10,7 +10,7 @@
   <arg name="serial_number" default="" />
 
   <!-- depth_type  0: MONO16, 1: TYPE_16UC1 -->
-  <arg name="depth_type" default="0" />
+  <arg name="depth_type" default="1" />
 
   <!-- node params -->
 
