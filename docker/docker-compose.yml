@@ -69,6 +69,26 @@ services:
         - SETUP=/root/catkin_ws/devel/setup.bash
     command: roslaunch --wait rosbridge_server rosbridge_websocket.launch    
 
+  debug:
+    image: ros:noetic-ros-core
+    network_mode: "host"
+    depends_on: 
+      - ros-master
+    env_file: .env
+    environment:
+      - TOPICS=$TOPICS
+    volumes:
+        - type: bind
+          source: ../rosbags
+          target: /rosbags/
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    command: rostopic hz $TOPICS
+  
   record:
     image: ros:noetic-ros-core
     network_mode: "host"
@@ -81,8 +101,7 @@ services:
         - type: bind
           source: ../rosbags
           target: /rosbags/
-    command: rosbag record --split --size=15120 --max-split 20 -O /rosbags/piso21_slam.bag $TOPICS
-  
+    command: rosbag record --split --size=10240 --max-split 1 -O /rosbags/tmp.bag $TOPICS
   #Vizualization Container
   #  viz:
   #  image: osrf/ros:kinetic-desktop-full
