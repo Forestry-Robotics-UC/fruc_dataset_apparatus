@@ -1,9 +1,9 @@
 [submodule "catkin_ws/src/depends/realsense-ros"]
 	path = catkin_ws/src/depends/realsense-ros
 	url = https://github.com/IntelRealSense/realsense-ros.git
-[submodule "catkin_ws/src/depends/livox-ros"]
-	path = catkin_ws/src/depends/livox-ros
-	url = https://github.com/Livox-SDK/livox_ros_driver.git
 [submodule "catkin_ws/src/depends/ethzasl_xsens_driver"]
 	path = catkin_ws/src/depends/ethzasl_xsens_driver
 	url = https://github.com/ethz-asl/ethzasl_xsens_driver.git
+[submodule "livox_ros_driver"]
+	path = livox_ros_driver
+	url = git@github.com:Forestry-Robotics-UC/livox_ros_driver.git
