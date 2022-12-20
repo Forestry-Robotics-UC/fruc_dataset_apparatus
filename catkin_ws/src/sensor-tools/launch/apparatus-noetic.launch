@@ -21,7 +21,7 @@
 		<arg name="enable_pointcloud" value="false"/>
 		<arg name="initial_reset" value="false"/>
 	</include>
-
+	
 	<include file="$(find livox_ros_driver)/launch/livox_lidar.launch">
 		<arg name="msg_frame_id" value="livox_frame"/>
 		<arg name="publish_freq" value="50"/>

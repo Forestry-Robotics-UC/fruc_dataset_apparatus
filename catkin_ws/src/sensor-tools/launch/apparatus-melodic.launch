@@ -1,12 +1,10 @@
 <launch>
 
 	<arg name="model" default="$(find sensor-tools)/urdf/mynteye_S3010.urdf"/>
-	<param name="/mynteye/depth/image_raw/compressedDepth/png_level" type="int" value="4" />
 	<!--  Remap topics from XSENS IMU Driver -->
 	<remap from="velocity" to="imu/velocity"/>
 	<remap from="analog_in1" to="imu/analog_in1"/>
 	<remap from="analog_in2" to="imu/analog_in2"/>
-	<remap from="diagnostics" to="imu/diagnostics"/>
 	<remap from="diagnostics" to="imu/diagnostics"/>
 	<remap from="temperature" to="imu/temperature"/>
 	<remap from="imu_data_str" to="imu/imu_data_str"/>

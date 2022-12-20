@@ -14,12 +14,12 @@
 
   <!-- node params -->
 
-  <arg name="enable_right" value="false" />
-  <arg name="enable_left" value="false" />
-  <arg name="enable_right_rect" value="false" />
+  <arg name="enable_right" value="true" />
+  <arg name="enable_left" value="true" />
+  <arg name="enable_right_rect" value="true" />
   <arg name="enable_disparity" value="true" />
-  <arg name="enable_disparity_norm" value="false" />
-  <arg name="frame_rate" value="15" />
+  <arg name="enable_disparity_norm" value="true" />
+  <arg name="frame_rate" value="20" />
 
   <arg name="left_topic" default="left/image_raw" />
   <arg name="right_topic" default="right/image_raw" />
