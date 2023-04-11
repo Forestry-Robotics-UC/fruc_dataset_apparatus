@@ -44,38 +44,38 @@ RUN apt-get -y install pkg-config libgtk2.0-dev
 RUN apt-get -y install libssl-dev libv4l-dev v4l-utils
 
 #Install OpenCV, Mynt Eye requires the 3.4.0 version of OpenCV
-WORKDIR /root
-RUN git clone https://github.com/opencv/opencv.git
-WORKDIR /root/opencv
-RUN git checkout tags/3.4.0
-RUN mkdir build
-WORKDIR /root/opencv/build
-RUN cmake \
-        -DCMAKE_BUILD_TYPE=RELEASE \
-        -DCMAKE_INSTALL_PREFIX=/usr/local \
-        -DWITH_CUDA=OFF \
-        -DBUILD_DOCS=OFF \
-        -DBUILD_EXAMPLES=OFF \
-        -DBUILD_TESTS=OFF \
-        -DBUILD_PERF_TESTS=OFF \
-        ..
-RUN make -j ${CORES} install
-ENV OpenCV_DIR=/root/opencv
+# WORKDIR /root
+# RUN git clone https://github.com/opencv/opencv.git
+# WORKDIR /root/opencv
+# RUN git checkout tags/3.4.0
+# RUN mkdir build
+# WORKDIR /root/opencv/build
+# RUN cmake \
+#         -DCMAKE_BUILD_TYPE=RELEASE \
+#         -DCMAKE_INSTALL_PREFIX=/usr/local \
+#         -DWITH_CUDA=OFF \
+#         -DBUILD_DOCS=OFF \
+#         -DBUILD_EXAMPLES=OFF \
+#         -DBUILD_TESTS=OFF \
+#         -DBUILD_PERF_TESTS=OFF \
+#         ..
+# RUN make -j ${CORES} install
+# ENV OpenCV_DIR=/root/opencv
 
 #Install Mynt Eye SDK
 WORKDIR /root
-RUN git clone https://github.com/slightech/MYNT-EYE-S-SDK.git
+RUN git clone https://github.com/zhouzhiwen2000/MYNT-EYE-S-SDK-NoAPI-ROSWrapper.git MYNT-EYE-S-SDK
 WORKDIR /root/MYNT-EYE-S-SDK/
 RUN make init
 RUN make install
 
 #Install ROS Packages
 RUN apt-get install -y ros-${ROS_DISTRO}-rviz \
-    ros-${ROS_DISTRO}-cv-bridge \
+    # ros-${ROS_DISTRO}-cv-bridge \
     ros-${ROS_DISTRO}-xacro \
     ros-${ROS_DISTRO}-image-transport-plugins
 
-RUN source ${ROS_ROOT}/setup.bash && make ros 
+RUN source ${ROS_ROOT}/setup.bash && make ros #Source ROS and compile Mynt ros wrapper
 #---
 
 #Configure catkin workspace
