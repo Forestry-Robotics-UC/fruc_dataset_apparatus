@@ -1,0 +1,5 @@
+<launch>
+
+	<node pkg="sensor-tools" type="system_monitoring.py" name="system_monitoring" output="screen"/>
+
+</launch>
