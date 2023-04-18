@@ -1,6 +1,6 @@
 ARG ARCH=
 ARG CORES=2
-FROM ${ARCH}ros:melodic-ros-base
+FROM ${ARCH}ros:melodic-ros-core
 
 LABEL maintainer="Mario Cristovao <mjpc13@protonmail.com>"
 
@@ -12,14 +12,13 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install packages
 RUN apt-get update \
     && apt-get install -y \
-    # Basic utilities
     build-essential \
     apt-utils \
     curl \
     cmake \
     git \
     wget \
-    vim \
+    libv4l-dev \
     nano
 
 # Install some python packages
@@ -38,7 +37,10 @@ RUN pip install pybind11 \
 
 # --- INSTALL MYNT EYE SDK ---
 #Install OpenCV dependencies
-RUN apt-get -y install pkg-config libgtk2.0-dev
+#Required
+RUN apt-get -y install pkg-config libgtk2.0-dev libavcodec-dev libavformat-dev libswscale-dev 
+#Optional
+RUN apt-get -y install python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev
 
 #Install ssl for https, v4l for video
 RUN apt-get -y install libssl-dev libv4l-dev v4l-utils
@@ -62,18 +64,19 @@ RUN apt-get -y install libssl-dev libv4l-dev v4l-utils
  RUN make -j ${CORES} install
  ENV OpenCV_DIR=/root/opencv
 
+#Install ROS Packages
+RUN apt-get install -y ros-${ROS_DISTRO}-rviz \
+    ros-${ROS_DISTRO}-cv-bridge \
+    ros-${ROS_DISTRO}-xacro \
+    ros-${ROS_DISTRO}-image-transport-plugins \
+    ros-${ROS_DISTRO}-nodelet
+
 #Install Mynt Eye SDK
 WORKDIR /root
 RUN git clone -b devel https://github.com/Forestry-Robotics-UC/MYNT-EYE-S-SDK.git MYNT-EYE-S-SDK
 WORKDIR /root/MYNT-EYE-S-SDK/
 RUN make init
 RUN make install
-
-#Install ROS Packages
-RUN apt-get install -y ros-${ROS_DISTRO}-rviz \
-    ros-${ROS_DISTRO}-cv-bridge \
-    ros-${ROS_DISTRO}-xacro \
-    ros-${ROS_DISTRO}-image-transport-plugins
 
 RUN source ${ROS_ROOT}/setup.bash && make ros #Source ROS and compile Mynt ros wrapper
 #---
