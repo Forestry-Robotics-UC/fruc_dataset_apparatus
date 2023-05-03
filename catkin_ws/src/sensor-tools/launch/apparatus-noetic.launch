@@ -1,7 +1,8 @@
 <launch>
 
 	<arg name="model" default="$(find sensor-tools)/urdf/sensor-box.urdf"/>
-	<param name="/realsense/aligned_depth_to_color/image_raw/compressedDepth/png_level" type="int" value="2" />
+	<param name="/realsense/aligned_depth_to_color/image_raw/compressedDepth/png_level" type="int" value="1" />
+	<param name="/realsense/color/image_raw/compressed/png_level" type="int" value="1" />
 
 	<include file="$(find realsense2_camera)/launch/rs_camera.launch">
 		<arg name="camera" value="realsense"/>
@@ -11,7 +12,7 @@
 		<arg name="color_width" value="640"/>
 		<arg name="color_height" value="480"/>
 		<arg name="depth_fps" value="30"/>
-		<arg name="enable_infra1" value="true"/>
+		<arg name="enable_infra1" value="false"/>
 		<arg name="enable_infra2" value="false"/>
 		<arg name="enable_gyro" value="true"/>
 		<arg name="gyro_fps" value="200" />
