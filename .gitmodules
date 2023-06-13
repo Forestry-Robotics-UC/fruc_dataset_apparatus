@@ -6,4 +6,4 @@
 	url = https://github.com/ethz-asl/ethzasl_xsens_driver.git
 [submodule "catkin_ws/src/depends/livox_ros_driver"]
 	path = catkin_ws/src/depends/livox_ros_driver
-	url = git@github.com:Forestry-Robotics-UC/livox_ros_driver.git
+	url = https://github.com/Forestry-Robotics-UC/livox_ros_driver.git
