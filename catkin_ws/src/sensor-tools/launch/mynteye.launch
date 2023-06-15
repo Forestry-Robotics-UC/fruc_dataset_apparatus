@@ -2,6 +2,10 @@
 <launch>
   <arg name="mynteye" default="mynteye" />
 
+  <!-- Adjust compress levels of camera -->
+  <param name="/mynteye/left/image_raw/compressed/png_level" type="int" value="2" />
+  <param name="/mynteye/right/image_raw/compressed/png_level" type="int" value="2" />
+
   <!-- mutiple device -->
   <arg name="is_multiple" default="false" />
 
@@ -11,9 +15,10 @@
 
   <!-- depth_type  0: MONO16, 1: TYPE_16UC1 -->
   <arg name="depth_type" default="1" />
+  
+  <arg name="model" default="$(find sensor-tools)/urdf/mynteye_S3010.urdf"/>
 
   <!-- node params -->
-
   <arg name="enable_right" value="true" />
   <arg name="enable_left" value="true" />
   <arg name="enable_right_rect" value="true" />
@@ -104,5 +109,62 @@
 
       <param name="gravity" value="$(arg gravity)" />
     </node>
+    
+    <!-- disable compressed depth plugin for image topics -->
+    <group ns="$(arg left_topic)">
+      <rosparam param="disable_pub_plugins">
+        - 'image_transport/compressedDepth'
+      </rosparam>
+    </group>
+    <group ns="$(arg left_rect_topic)">
+      <rosparam param="disable_pub_plugins">
+        - 'image_transport/compressedDepth'
+      </rosparam>
+    </group>
+    <group ns="/mynteye/right_rect_mono">
+      <rosparam param="disable_pub_plugins">
+        - 'image_transport/compressedDepth'
+      </rosparam>
+    </group>
+    <group ns="/mynteye/left_rect_mono">
+      <rosparam param="disable_pub_plugins">
+        - 'image_transport/compressedDepth'
+      </rosparam>
+    </group>
+    <group ns="$(arg left_mono_topic)">
+      <rosparam param="disable_pub_plugins">
+        - 'image_transport/compressedDepth'
+      </rosparam>
+    </group>
+    <group ns="$(arg right_topic)">
+      <rosparam param="disable_pub_plugins">
+        - 'image_transport/compressedDepth'
+      </rosparam>
+    </group>
+    <group ns="$(arg right_mono_topic)">
+      <rosparam param="disable_pub_plugins">
+        - 'image_transport/compressedDepth'
+      </rosparam>
+    </group>
+    <group ns="$(arg right_rect_topic)">
+      <rosparam param="disable_pub_plugins">
+        - 'image_transport/compressedDepth'
+      </rosparam>
+    </group>
+    <group ns="$(arg disparity_topic)">
+      <rosparam param="disable_pub_plugins">
+        - 'image_transport/compressedDepth'
+      </rosparam>
+    </group>
+    <group ns="$(arg disparity_norm_topic)">
+      <rosparam param="disable_pub_plugins">
+        - 'image_transport/compressedDepth'
+      </rosparam>
+    </group>
+    <group ns="$(arg depth_topic)">
+      <rosparam param="disable_pub_plugins">
+        - 'image_transport/compressedDepth'
+      </rosparam>
+    </group>
   </group> <!-- mynteye -->
 </launch>

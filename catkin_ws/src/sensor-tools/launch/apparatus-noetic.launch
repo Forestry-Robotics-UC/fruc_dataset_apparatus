@@ -1,37 +1,21 @@
+<?xml version="1.0"?>
+
 <launch>
 
+	<!-- URDF Transforms-->
 	<arg name="model" default="$(find sensor-tools)/urdf/sensor-box.urdf"/>
-	<param name="/realsense/aligned_depth_to_color/image_raw/compressedDepth/png_level" type="int" value="2" />
-
-	<include file="$(find realsense2_camera)/launch/rs_camera.launch">
-		<arg name="camera" value="realsense"/>
-		<arg name="enable_infra" value="true"/>
-		<arg name="infra_fps" value="30"/>
-		<arg name="color_fps" value="30"/>
-		<arg name="color_width" value="640"/>
-		<arg name="color_height" value="480"/>
-		<arg name="depth_fps" value="30"/>
-		<arg name="enable_infra1" value="true"/>
-		<arg name="enable_infra2" value="false"/>
-		<arg name="enable_gyro" value="true"/>
-		<arg name="gyro_fps" value="200" />
-		<arg name="enable_accel" value="true"/>
-		<arg name="accel_fps" value="63" />
-		<arg name="align_depth" value="true"/>
-		<arg name="enable_pointcloud" value="false"/>
-		<arg name="initial_reset" value="false"/>
-	</include>
-	
-	<include file="$(find livox_ros_driver)/launch/livox_lidar.launch">
-		<arg name="msg_frame_id" value="livox_frame"/>
-		<arg name="publish_freq" value="50"/>
-		<!--<arg name="bd_list" value="3GGDJ2Q00100941"/>-->
-	</include>
-
 	<param name="robot_description" textfile="$(arg model)" />
 	<node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
             <remap from="joint_state" to="joint_state"/>
             <param name="publish_frequency" type="double" value="15.0"/>
     </node>
+
+
+	<!-- livox Mid-70-->
+	<include file="$(find sensor-tools)/launch/livox_mid70.launch" />
+
+	<!-- REALSENSE D435i-->
+	<include file="$(find sensor-tools)/launch/realsense_d435i.launch" />
+
 
 </launch>
