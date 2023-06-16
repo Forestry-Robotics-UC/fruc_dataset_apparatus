@@ -1,101 +1,50 @@
-# FRUC Test Apparatus
+# Getting Started
 
-# Docker 
+To begin recording data on any Linux-based computer, follow the steps below:
 
-To run the apparatus with docker just run:
+1. **Install Docker**: First, make sure you have Docker installed on your system. Docker is a platform that allows you to package and distribute applications in lightweight, isolated containers. You can download Docker from the official website [here](https://www.docker.com/) and follow the installation instructions specific to your operating system.
 
-```bash
-cd docker/
-docker compose up
-```
-To connect the **host** computer to the **ROS master** running inside the containers execute the following commands in the terminal:
-```bash
-export ROS_IP=172.19.0.1 && export ROS_MASTER_URI=http://172.19.0.2:11311
-```
+2. **Download the Repository**: Next, download the repository containing the necessary files for recording. You can do this by cloning the repository using Git or by downloading the repository as a ZIP file and extracting it to a local directory on your computer.
 
+3. **Initialize Git Submodules**: Within the downloaded repository, there may be Git submodules that need to be initialized. Git submodules are separate Git repositories embedded within a parent repository. To initialize the submodules, navigate to the repository's root directory using a terminal or command prompt and execute the following command:
+   ```bash
+   git submodule init
+   git submodule update
+   ```
 
-# Services
+4. **Configure Topic Selection**: Create a `.env` file in the `docker/` directory of the repository. This file will specify the topic names you want to record. Open the `.env` file in a text editor and define the topics using the following format:
+   ```bash
+   USER=username
 
-## ros-master
+   TOPICS="
+       /imu/data
+       /imu/mag
+       /imu/temperature
+       /livox/lidar
+       /mynteye/left_rect/image_rect/compressed
+       /mynteye/left_rect/camera_info
+       /mynteye/right_rect/image_rect/compressed
+       /mynteye/right_rect/camera_info
+       /mynteye/depth/image_raw
+       /realsense/color/image_raw/compressed
+       /realsense/color/camera_info
+       /realsense/aligned_depth_to_color/image_raw/compressedDepth
+       /realsense/aligned_depth_to_color/camera_info
+       /realsense/accel/sample
+       /realsense/gyro/sample
+       /mimix3/gps/assisted
+   "
+   ```
 
-The core image of ros noetic with ngrok to create the master.
+   In the above example, we have provided a list of example topics that you may want to record. You can customize this list based on your specific requirements.
 
-### Software 
+5. **Connect the Sensors**: Connect the required sensors to your computer, making sure they are properly powered. This may involve connecting devices such as the Mynt Eye s1030 camera, Xsens IMU, Intel Realsense D435i camera, Livox LiDAR, and any other sensors you wish to use.
 
-- OS: **Ubuntu 20.04**
-- ROS: **Noetic**
-- ngrok 
+6. **Launch the Recording System**: Open a terminal or command prompt and navigate to the `fruc_dataset_apparatus/docker` directory within the downloaded repository. Run the following command to start the recording system using Docker Compose:
+   ```bash
+   docker-compose up
+   ```
 
-### Environment Variables
+   Docker Compose will read the configuration from the `docker-compose.yml` file and launch the required containers with the specified settings. You will see the output and logs from each container in the terminal window.
 
-- **NGROK_TOKEN (Optional)**: The ngrok token to set up and connect to ngrok
-
-## ros-melodic
-
-A base image of ros melodic with the software necessary to use the IMU and Mynt Eye camera.
-
-### Software 
-
-- OS: **Ubuntu 18.04**
-- ROS: **Melodic**
-- OpenCV: **3.4.1** compile from source 
-- [MYNT SDK](https://github.com/slightech/MYNT-EYE-D-SDK) compiled from source
-- catkin_tools
-
-### Environment Variables
-
-- **SETUP**: The path for the setup.bash file used in the source. default: "opt/ros/$ROS_DISTRO/devel/setup.bash"
-- **BUILDLIST**: Packages to be compiled by catkin_tools
-- **LAUNCHFILE**: The launch file to be executed when running the container
-- **ROSPACKAGE**: The package of the desired launch file
-- **XSENS_MODE**: Paramenters related to configuration of the IMU Xsens MTi Legacy (see options below)
-- **XSENS_SETTINGS**: Paramenters related to configuration of the IMU Xsens MTi Legacy (see options below)
-
-#### Xsense Options
-
-Xsens allows configuration of their devices these environments change the configuration of the Legacy devices.
-
-- **XSENS_MODE** - Select the information to output of Legacy infos. Can be a string composed of the following characters (in any order):
-	- t temperature
-	- c calibrated data
-	- o orientation data
-        - a auxiliary data
-        - p position data (requires MTi-G)
-        - v velocity data (requires MTi-G)
-        - s status data
-        - g raw GPS mode (requires MTi-G)
-        - r raw (incompatible with others except raw GPS)
-
-- **XSENS_SETTINGS** - Settings of the Legacy device. This is required for 'legacy-configure' command.Can be a string composed of the following characters (in any order):
-	- t sample count (excludes 'n')
-	- n no sample count (excludes 't')
-	- u UTC time
-	- q orientation in quaternion (excludes 'e' and 'm')
-	- e orientation in Euler angles (excludes 'm' and 'q')
-	- m orientation in matrix (excludes 'q' and 'e')
-	- A acceleration in calibrated data
-	- G rate of turn in calibrated data
-	- M magnetic field in calibrated data
-	- i only analog input 1 (excludes 'j')
-	- j only analog input 2 (excludes 'i')
-	- N North-East-Down instead of default: X North Z up
-
-## ros-noetic
-
-A base noetic image with the software necessary to use the Livox LiDAR and the Intel RealSense camera
-
-### Software 
-
-- OS: **Ubuntu 20.04**
-- ROS: **Noetic**
-- [librealsense2](https://github.com/IntelRealSense/librealsense/releases/tag/v2.50.0)
-- [realsense-ros ](https://github.com/IntelRealSense/realsense-ros) wrapper
-- Livox-SDK
-- catkin_tools
-
-## Environment Variables
-
-- **SETUP**: The path for the setup.bash file used in the source. default: "opt/ros/$ROS_DISTRO/devel/setup.bash"
-- **BUILDLIST**: Packages to be compiled by catkin_tools
-- **LAUNCHFILE**: The launch file to be executed when running the container
-- **ROSPACKAGE**: The package of the desired launch file
+   The recording system is now up and running, capturing data from the selected topics and storing it in a rosbag file under `fruc_dataset_apparatus/docker`. You can customize the behavior and settings of the recording system by modifying the `docker-compose.yml` file or other relevant configuration files within the repository.
