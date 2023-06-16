@@ -3,10 +3,10 @@ version: "3"
 #Create a network that links containers
 services:
   #Create a container for the ROS master
-  ros-master:
-    image: ros:noetic-ros-core
-    network_mode: "host"
-    command: roscore
+  #  ros-master:
+  #    image: ros:noetic-ros-core
+  #    network_mode: "host"
+  #    command: roscore
 
   #Create the Melodic Container
   ros-melodic:
@@ -92,7 +92,7 @@ services:
         - type: bind
           source: ../rosbags
           target: /rosbags/
-    command: rosbag record --split --size=10240 --max-split 4 -O /rosbags/recording.bag $TOPICS
+    command: rosbag record --split --size=1024 --max-split 4 -O /rosbags/recording.bag $TOPICS
   #Vizualization Container
   #  viz:
   #  image: osrf/ros:kinetic-desktop-full

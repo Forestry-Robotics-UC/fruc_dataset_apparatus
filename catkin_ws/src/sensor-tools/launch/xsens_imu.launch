@@ -2,13 +2,6 @@
 
 <launch>
 
-
-	<include file="$(find xsens_driver)/launch/xsens_driver.launch" >
-		<arg name="frame_id" value="xsens_frame" />
-        <arg name="model"      default="$(find sensor-tools)/urdf/xsens_mti_example.urdf"/>
-        <arg name="gui"        default="False" />
-        <arg name="rvizconfig" default="$(find xsens_driver)/config/xsens_urdf_check.rviz" />
-
         <remap from="velocity" to="imu/velocity"/>
         <remap from="analog_in1" to="imu/analog_in1"/>
         <remap from="analog_in2" to="imu/analog_in2"/>
@@ -16,6 +9,12 @@
         <remap from="diagnostics" to="imu/diagnostics"/>
         <remap from="temperature" to="imu/temperature"/>
         <remap from="imu_data_str" to="imu/imu_data_str"/>
+	<arg name="model"      default="$(find sensor-tools)/urdf/xsens_mti_example.urdf"/>
+	<arg name="gui"        default="False" />
+	<arg name="rvizconfig" default="$(find xsens_driver)/config/xsens_urdf_check.rviz" />
+	
+	<include file="$(find xsens_driver)/launch/xsens_driver.launch" >
+		<arg name="frame_id" value="xsens_frame" />
 	</include>
 
 
