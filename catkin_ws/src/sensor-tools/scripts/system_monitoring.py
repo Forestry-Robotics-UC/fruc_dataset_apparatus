@@ -1,7 +1,8 @@
-import rospy
+import rospy, os
 from rostopic import ROSTopicHz
 from std_msgs.msg import Header
 from diagnostic_msgs.msg import KeyValue, DiagnosticStatus, DiagnosticArray
+
 
 class MonitorSystem():
 
@@ -18,24 +19,12 @@ class MonitorSystem():
         self.rt = ROSTopicHz(window_size, filter_expr=None)
         self.rate = 0.5 #0.5Hz
         
-        #TODO: Don't hard code this
-        self.topic_array = ["/imu/data",
-                            "/imu/mag",
-                            "/imu/temperature",
-                            #"/livox/lidar",
-                            "/mynteye/left_rect/image_rect/compressed",
-                            "/mynteye/left_rect/camera_info",
-                            "/mynteye/right_rect/image_rect/compressed",
-                            "/mynteye/right_rect/camera_info",
-                            "/mynteye/depth/image_raw",
-                            "/realsense/color/image_raw/compressed",
-                            "/realsense/color/camera_info",
-                            "/realsense/aligned_depth_to_color/image_raw/compressedDepth",
-                            "/realsense/aligned_depth_to_color/camera_info",
-                            "/realsense/accel/sample",
-                            "/realsense/gyro/sample",
-                            "/realsense/infra1/image_rect_raw/compressed",
-                            "/realsense/infra1/camera_info"]
+        #Read the TOPICS enviroment variable
+        topics_env = os.getenv("TOPICS")
+
+        #Saves the topics as an array
+        self.topic_array = topics_env.strip().split("\n") 
+        
         self.rt_array = []
         
         # Create a ROSTopicHz object for every topic and adds them to the rt_array array

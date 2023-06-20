@@ -3,15 +3,12 @@ version: "3"
 #Create a network that links containers
 services:
   #Create a container for the ROS master
-  ros-master:
-    image: mjpc13/ros:noetic-core
-    #env_file: .env
-    environment:
-      - NGROK_TOKEN=$NGROK_TOKEN
-    network_mode: "host"
-    command: roscore
-    
-  #Create the Melodic Container (required by Mynt Eye)
+  #  ros-master:
+  #    image: ros:noetic-ros-core
+  #    network_mode: "host"
+  #    command: roscore
+
+  #Create the Melodic Container
   ros-melodic:
     build:
       context: .
@@ -25,7 +22,6 @@ services:
         - type: bind
           source: ../catkin_ws/src
           target: /root/catkin_ws/src
-    network_mode: "host"
     environment:
         - SETUP=/root/catkin_ws/devel/setup.bash
         - BUILDLIST= sensor-tools xsens_driver
@@ -48,26 +44,21 @@ services:
         - type: bind
           source: ../catkin_ws/src
           target: /root/catkin_ws/src
-    network_mode: "host"
     environment:
         - SETUP=/root/catkin_ws/devel/setup.bash
-        - BUILDLIST= sensor-tools livox_ros_driver realsense2_camera #Only this packages will be build
+        - BUILDLIST= sensor-tools livox_ros_driver realsense2_camera #Only these packages will be build
         - ROSPACKAGE=sensor-tools #rospackage of the desired launchfile
         - LAUNCHFILE=apparatus-noetic.launch #launchfile to be launch after compilation
     command: ./noetic-launch.sh
   
   #Ros bridge container ( creates a websocket server to connect Android devices)
   ros-bridge:
-    image: mjpc13/ros:noetic-base
-    network_mode: "host"
+    build:
+      context: .
+      dockerfile: rosbridge.Dockerfile
     depends_on:
       - ros-master
     network_mode: "host"
-    ports: #Exposes the 9090 port to the host computer, so it can be reached from external devices
-      - "9090:9090" 
-    environment:
-        - SETUP=/root/catkin_ws/devel/setup.bash
-    command: roslaunch --wait rosbridge_server rosbridge_websocket.launch    
 
   debug:
     image: ros:noetic-ros-core
@@ -101,7 +92,7 @@ services:
         - type: bind
           source: ../rosbags
           target: /rosbags/
-    command: rosbag record --split --size=10240 --max-split 4 -O /rosbags/02_choupal_circle.bag $TOPICS
+    command: rosbag record --split --size=1024 --max-split 4 -O /rosbags/recording.bag $TOPICS
   #Vizualization Container
   #  viz:
   #  image: osrf/ros:kinetic-desktop-full
