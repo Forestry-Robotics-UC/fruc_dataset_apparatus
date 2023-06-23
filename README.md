@@ -48,3 +48,7 @@ To begin recording data on any Linux-based computer, follow the steps below:
    Docker Compose will read the configuration from the `docker-compose.yml` file and launch the required containers with the specified settings. You will see the output and logs from each container in the terminal window.
 
    The recording system is now up and running, capturing data from the selected topics and storing it in a rosbag file under `fruc_dataset_apparatus/docker`. You can customize the behavior and settings of the recording system by modifying the `docker-compose.yml` file or other relevant configuration files within the repository.
+
+--------------
+
+For more details, please check the Apparatus [Wiki](https://github.com/Forestry-Robotics-UC/fruc_dataset_apparatus/wiki)!
