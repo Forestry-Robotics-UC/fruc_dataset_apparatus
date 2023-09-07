@@ -2,10 +2,15 @@
 
 <launch>
 	
+	<!-- Define your condition -->
+  	<arg name="enable_mynteye" default="true" />
+
 	<!--  MYNT EYE S1030 -->	
-	<include file="$(find sensor-tools)/launch/mynteye.launch" />
+	<include file="$(find sensor-tools)/launch/mynteye.launch" if="$(arg enable_mynteye)"/>
 
 	<!--  XSENS IMU -->
 	<include file="$(find sensor-tools)/launch/xsens_imu.launch" />
 
+	<!-- publish static transform -->
+	<node pkg="tf2_ros" type="static_transform_publisher" name="static_transform_publisher" args="0 0 0 0 0 0 livox_frame livox" />
 </launch>

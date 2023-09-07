@@ -73,7 +73,7 @@ RUN apt-get install -y ros-${ROS_DISTRO}-rviz \
 
 #Install Mynt Eye SDK
 WORKDIR /root
-RUN git clone -b devel https://github.com/Forestry-Robotics-UC/MYNT-EYE-S-SDK.git MYNT-EYE-S-SDK
+RUN git clone  https://github.com/Forestry-Robotics-UC/MYNT-EYE-S-SDK.git MYNT-EYE-S-SDK
 WORKDIR /root/MYNT-EYE-S-SDK/
 RUN make init
 RUN make install
