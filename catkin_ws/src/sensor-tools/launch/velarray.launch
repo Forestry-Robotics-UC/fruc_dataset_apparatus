@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+
+<launch>
+
+	<node name="velodyne_ros1_lidar_driver" pkg="velodyne_ros1_lidar_driver" type="velodyne_ros1_lidar_driver">
+	<param name="config_file" value="/opt/velodyne/velodyne-lidar-driver/config/lidar_driver_velarray_m1600.cfg"/>
+	</node>
+
+</launch>

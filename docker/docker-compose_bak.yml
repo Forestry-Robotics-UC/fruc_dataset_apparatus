@@ -1,0 +1,149 @@
+version: "3"
+
+#Create a network that links containers
+services:
+  #Create a container for the ROS master
+  #  ros-master:
+  #    image: ros:noetic-ros-core
+  #    network_mode: "host"
+  #    command: roscore
+
+  #Create the Melodic Container
+  ros-melodic:
+    build:
+      context: .
+      dockerfile: melodic.Dockerfile
+    depends_on:
+      - ros-master
+    privileged: true
+    network_mode: "host"
+    group_add:
+      - keep-groups
+    #Mount the src/ folder inside the docker container
+    volumes:
+        - type: bind
+          source: ../catkin_ws/src
+          target: /root/catkin_ws/src
+    environment:
+        - SETUP=/root/catkin_ws/devel/setup.bash
+        - BUILDLIST= sensor-tools xsens_driver
+        - ROSPACKAGE=sensor-tools
+        - LAUNCHFILE=apparatus-melodic.launch
+        - XSENS_MODE=sotac #Paramenters related to configuration of Xsens MTi Legacy
+        - XSENS_SETTINGS=tqMAG #Paramenters related to configuration of Xsens MTi Legacy
+    command: ./melodic-launch.sh
+  
+  ##Create the Noetic Container
+  ros-noetic:
+    build:
+      context: .
+      dockerfile: noetic.Dockerfile
+    depends_on:
+      - ros-master
+    privileged: true
+    group_add:
+      - keep-groups
+    network_mode: "host"
+    volumes:
+        - type: bind
+          source: ../catkin_ws/src
+          target: /root/catkin_ws/src
+    environment:
+        - SETUP=/root/catkin_ws/devel/setup.bash
+        - BUILDLIST= sensor-tools livox_ros_driver realsense2_camera #Only these packages will be build
+        - ROSPACKAGE=sensor-tools #rospackage of the desired launchfile
+        - LAUNCHFILE=apparatus-noetic.launch #launchfile to be launch after compilation
+    command: ./noetic-launch.sh
+  
+  #Ros bridge container ( creates a websocket server to connect Android devices)
+  ros-bridge:
+    build:
+      context: .
+      dockerfile: rosbridge.Dockerfile
+    depends_on:
+      - ros-master
+    network_mode: "host"
+
+  debug:
+    build:
+      context: .
+      dockerfile: rosbridge.Dockerfile
+    network_mode: "host"
+    depends_on: 
+      - ros-master
+    env_file: .env
+    environment:
+      - TOPICS=$TOPICS
+    volumes:
+        - type: bind
+          source: ../rosbags
+          target: /rosbags/
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    command: rostopic hz $TOPICS
+  
+  record:
+    image: ros:noetic-ros-base
+    network_mode: "host"
+    depends_on: 
+      - ros-master
+    env_file: .env
+    environment:
+      - TOPICS=$TOPICS
+    volumes:
+        - type: bind
+          source: ../rosbags
+          target: /rosbags/
+    command: rosbag record --split --size=10240 --max-split 4 -O /rosbags/deck_01.bag $TOPICS
+
+    # SLAM Container
+  slam:
+    depends_on:
+      - ros-master
+    privileged: true
+    group_add:
+      - keep-groups
+    network_mode: "host"
+    build:
+     context: .
+     dockerfile: melodic-slam.Dockerfile
+    depends_on:
+      - ros-master
+    environment:
+      - SETUP=/root/catkin_ws/devel/setup.bash
+      - BUILDLIST= livox_mapping #Only these packages will be build
+      - ROSPACKAGE=livox_mapping #rospackage of the desired launchfile
+      - LAUNCHFILE=mapping_mid.launch rviz:=false #launchfile to be launch after compilation
+    command: ./melodic-slam-launch.sh
+    
+  #Vizualization Container
+  viz:
+    image: ghcr.io/foxglove/studio:latest
+    network_mode: "host"
+
+  #  viz:
+  #  image: osrf/ros:kinetic-desktop-full
+  #  container_name: ros_visualizer
+  #  depends_on:
+  #    - ros-master
+  #  network_mode: "host"
+  #  environment:
+  #    - "DISPLAY"
+  #    - "QT_X11_NO_MITSHM=1" #fix some QT bugs
+  #  user: 1000:1000 #adapt as needed!
+  #  env_file: .env
+  #  volumes: 
+  #    #share your x11 socket and permissions to the container
+  #    - /tmp/.X11-unix:/tmp/.X11-unix:rw
+  #    - /etc/group:/etc/group:ro
+  #    - /etc/passwd:/etc/passwd:ro
+  #    - /etc/shadow:/etc/shadow:ro
+  #    - /etc/sudoers:/etc/sudoers:ro
+  #    - /etc/sudoers.d:/etc/sudoers.d:ro
+  #    - /home/$USER:/home/$USER:rw #share your home with write permissions
+  #    - ../rviz:/rviz/:rw #Pass the Rviz config files
+  #  command: rqt

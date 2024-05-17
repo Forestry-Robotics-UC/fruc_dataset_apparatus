@@ -2,7 +2,7 @@
 set -e
 
 cd /root/catkin_ws/
-catkin config --buildlist $BUILDLIST
+catkin config --extend /opt/velodyne/velodyne-lidar-driver-ros/ --buildlist $BUILDLIST
 catkin build
 
 # setup ros environment

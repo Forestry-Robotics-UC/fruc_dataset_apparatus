@@ -7,3 +7,6 @@
 [submodule "catkin_ws/src/depends/livox_ros_driver"]
 	path = catkin_ws/src/depends/livox_ros_driver
 	url = https://github.com/Forestry-Robotics-UC/livox_ros_driver.git
+[submodule "catkin_ws/src/depends/velarray"]
+	path = catkin_ws/src/depends/velarray
+	url = https://github.com/mbiselx/velarray.git
