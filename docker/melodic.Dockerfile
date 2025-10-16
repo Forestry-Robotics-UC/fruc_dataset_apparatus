@@ -69,7 +69,9 @@ RUN apt-get install -y ros-${ROS_DISTRO}-rviz \
     ros-${ROS_DISTRO}-cv-bridge \
     ros-${ROS_DISTRO}-xacro \
     ros-${ROS_DISTRO}-image-transport-plugins \
-    ros-${ROS_DISTRO}-nodelet
+    ros-${ROS_DISTRO}-nodelet \
+    ros-${ROS_DISTRO}-serial \
+    ros-${ROS_DISTRO}-roslint
 
 #Install Mynt Eye SDK
 WORKDIR /root
@@ -89,6 +91,7 @@ WORKDIR $CATKIN_WS
 # Clean-up
 WORKDIR /
 RUN apt-get clean
+
 
 #RUN echo "source /usr/local/bin/catkin_entrypoint.sh" >> /root/.bashrc
 COPY melodic-launch.sh /melodic-launch.sh

@@ -13,4 +13,8 @@
 
 	<!-- publish static transform -->
 	<node pkg="tf2_ros" type="static_transform_publisher" name="static_transform_publisher" args="0 0 0 0 0 0 livox_frame livox" />
+
+	<!-- REACH M2 RTK -->
+	<include file="$(find sensor-tools)/launch/reach_m2.launch" />
+
 </launch>

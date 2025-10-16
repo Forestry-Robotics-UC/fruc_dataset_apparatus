@@ -80,9 +80,6 @@ RUN apt-get update && apt-get install -y libgoogle-glog0v5 libconfig++9v5 libzmq
 RUN dpkg -i ./velodyne-lidar-driver_2.7.0-23.01.30.1915_focal_amd64.deb \
             ./ros-noetic-velodyne-lidar-driver_2.7.0-23.01.30.1915_focal_amd64.deb
 
-#ros-noetic-velodyne-lidar-driver_2.7.0-23.01.30.1915_focal_amd64.deb
-#velodyne-lidar-driver_2.7.0-23.01.30.1915_focal_amd64.deb
-
 # Clean-up
 WORKDIR /
 RUN apt-get clean

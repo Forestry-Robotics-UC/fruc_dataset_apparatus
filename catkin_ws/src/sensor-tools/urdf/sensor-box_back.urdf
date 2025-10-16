@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<robot name="sensor_box">
+  
+  <!-- ..Material Definitions.. -->
+  <material name="black">
+    <color rgba="0 0 0 1"/>
+  </material>
+
+  <material name="white">
+    <color rgba="1 1 1 1"/>
+  </material>
+  
+  <!-- SENSOR BOX KIT -->
+
+    <link name="base_sensor_box" > <!--REFERENCE FRAME FOR THE SENSING KIT!-->
+        <visual>      
+         	<origin
+            xyz="0 0 0"
+            rpy="0 0 0" />
+          <geometry>
+	          <mesh filename="file:///rviz/mesh/sensor_box.stl" scale="0.001 0.001 0.001"/>
+          </geometry>
+          <material name="white"/>
+        </visual>
+    </link>  
+
+
+<!-- SENSOR LINKS (from bottom to top) -->
+
+    <link name="aft_mapped"/>
+    <link name="base_link"/>
+    <link name="realsense_link"/>
+    <link name="realsense_bottom_screw_frame"/>
+    <link name="xsens_base"/>
+    <link name="xsens_frame"/>
+    <link name="mynteye_bottom_screw_frame" />
+    <link name="mynteye_link" />
+    <link name="livox_frame" />
+
+<!-- JOINT DEFINITIONS/STATIC TFs -->
+
+    <!-- CREATE THE BASE LINK-->
+    <joint name="base_link_to_base_sensor_box" type="fixed">
+        <parent link="base_link" />
+        <child link="base_sensor_box"/>
+        <origin rpy="0 0 0" xyz="0 0 0" /> 
+    </joint>
+
+    <!-- REALSENSE LINKS/TFs-->
+    <joint name="base_sensor_box_to_realsense" type="fixed">
+        <parent link="base_sensor_box" />
+        <child link="realsense_bottom_screw_frame"/>
+        <origin rpy="0 0 0" xyz="0.03610 0.018 0.03174" /> 
+    </joint>
+
+    <!-- camera body, with origin at bottom screw mount -->
+    <joint name="realsense_bottom_screw_to_realsense" type="fixed">
+      <parent link="realsense_bottom_screw_frame"/>
+      <child link="realsense_link" />
+      <origin rpy="0 0 0" xyz="0.0149 0.00175 0.00125" /> 
+    </joint>
+
+    <!-- XSENS LINKS -->
+    <joint name="base_sensor_box_to_xsens" type="fixed">
+        <parent link="base_sensor_box" />
+        <child link="xsens_base"/>
+        <origin rpy="0 0 1.5708" xyz="-0.0285 0.0482 0" /> 
+    </joint>
+
+    <!-- Transforms the original Xsens frame to the middle of the base
+    This TF was taken from the following PR: https://github.com/ethz-asl/ethzasl_xsens_driver/pull/86 -->
+    <joint name="xsens_to_original_xsense" type="fixed">
+      <origin xyz="0.01735 0.0061 0.0095" rpy="0.0 0.0 0.0" />
+      <parent link="xsens_base" />
+      <child link="xsens_frame"/>
+    </joint>
+
+    <!-- MYNTEYE LINKS -->
+    <joint name="base_sensor_box_to_mynt_bottom_screw" type="fixed">
+        <parent link="base_sensor_box" />
+        <child link="mynteye_bottom_screw_frame"/>
+        <origin rpy="0 0 0" xyz="-0.0015 0.035 0.140" /> 
+    </joint>
+
+    <joint name="mynt_bottom_link_to_mynt_link" type="fixed">
+      <origin xyz="0.0 0.01 0.0136" rpy="0 0 0.78" />
+      <parent link="mynteye_bottom_screw_frame" />
+      <child link="mynteye_link"/>
+    </joint>
+
+    <!-- LIVOX MID-70 LINK-->
+    <joint name="base_sensor_box_to_livox" type="fixed">
+        <parent link="base_sensor_box" />
+        <child link="livox_frame"/>
+        <origin rpy="0 0 0" xyz="0.0404 0 0.264" /> 
+    </joint>
+
+        
+    <joint name="aft_mapped_to_base_link" type="fixed">
+        <parent link="aft_mapped" />
+        <child link="base_link"/>
+        <origin rpy="0 0 0" xyz="-0.0404 0 -0.264" /> 
+    </joint>
+
+</robot>

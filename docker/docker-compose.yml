@@ -26,7 +26,7 @@ services:
         target: /root/catkin_ws/src
     environment:
       - SETUP=/root/catkin_ws/devel/setup.bash
-      - BUILDLIST= sensor-tools xsens_driver
+      - BUILDLIST= sensor-tools xsens_driver emlid_reach_ros nmea_msgs
       - ROSPACKAGE=sensor-tools
       - LAUNCHFILE=apparatus-melodic.launch
       - XSENS_MODE=sotac #Paramenters related to configuration of Xsens MTi Legacy
@@ -48,6 +48,9 @@ services:
         - type: bind
           source: ../catkin_ws/src
           target: /root/catkin_ws/src
+        - type: bind
+          source: /dev
+          target: /dev
     environment:
         - SETUP=/root/catkin_ws/devel/setup.bash
         - BUILDLIST= sensor-tools livox_ros_driver realsense2_camera #Only these packages will be build
@@ -62,41 +65,43 @@ services:
     dockerfile: rosbridge.Dockerfile
     network_mode: "host"
   #
-  #debug:
-  #build:
-  #context: .
-  #dockerfile: rosbridge.Dockerfile
-  #network_mode: "host"
-  #depends_on: 
-  #- ros-master
-  #env_file: .env
-  #environment:
-  #- TOPICS=$TOPICS
-  #volumes:
-  #- type: bind
-  #source: ../rosbags
-  #target: /rosbags/
-  #deploy:
-  #restart_policy:
-  #condition: on-failure
-  #delay: 5s
-  #max_attempts: 3
-  #window: 120s
-  #command: rostopic hz $TOPICS
-  
-  record:
-    image: ros:noetic-ros-base
+  debug:
+    build:
+      context: .
+      dockerfile: rosbridge.Dockerfile
     network_mode: "host"
     depends_on: 
       - ros-master
     env_file: .env
     environment:
       - TOPICS=$TOPICS
+    command: ls #rostopic hz $TOPICS
+  
+  record:
+    build:
+      context: .
+      dockerfile: record.Dockerfile
+    network_mode: "host"
+    depends_on: 
+      - ros-master
+    env_file: .env
+    environment:
+      - SETUP=/root/catkin_ws/devel/setup.bash
+      - TOPICS=$TOPICS
+      - BUILDLIST= rosbag_fancy rosbag_fancy_msgs rqt_rosbag_fancy #Only these packages will be build
+      - BAG_SIZE=10GB
+      - DELETE_AT_SIZE=100GB
+      - BAG_NAME=lab_test
     volumes:
+      - type: bind
+        source: ../catkin_ws/src
+        target: /root/catkin_ws/src
       - type: bind
         source: ../rosbags
         target: /rosbags/
-    command: rosbag record --split --size=10240 --max-split 4 -O /rosbags/deck_01.bag $TOPICS
+    command: ./record-launch.sh
+        #command: roscore
+
     #
     ## SLAM Container
     #slam:

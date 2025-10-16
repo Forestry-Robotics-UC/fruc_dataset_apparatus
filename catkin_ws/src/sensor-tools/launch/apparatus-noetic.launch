@@ -12,13 +12,13 @@
 
 
 	<!-- livox Mid-70-->
-	<include file="$(find sensor-tools)/launch/livox_mid70.launch" />
+		<!--<include file="$(find sensor-tools)/launch/livox_mid70.launch" />-->
 
         <!--Velarray-->
-	<include file="$(find sensor-tools)/launch/velarray.launch" />
+		<include file="$(find sensor-tools)/launch/velarray.launch" />
 
 	<!-- REALSENSE D435i-->
-	<include file="$(find sensor-tools)/launch/realsense_d435i.launch" />
+		<include file="$(find sensor-tools)/launch/realsense_d435i.launch" />
 
 
 </launch>
