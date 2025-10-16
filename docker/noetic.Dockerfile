@@ -69,6 +69,17 @@ ENV CATKIN_WS=/root/catkin_ws
 RUN mkdir -p $CATKIN_WS/src
 #WORKDIR $CATKIN_WS
 
+#Install proprietary Velodyne Drivers
+WORKDIR /workspace/proprietary
+ADD ./proprietary/ .
+#COPY ./proprietary/velodyne-lidar-driver_2.7.0-23.01.30.1915_focal_amd64.deb velodyne-lidar-driver.deb
+
+
+RUN apt-get update && apt-get install -y libgoogle-glog0v5 libconfig++9v5 libzmq3-dev
+
+RUN dpkg -i ./velodyne-lidar-driver_2.7.0-23.01.30.1915_focal_amd64.deb \
+            ./ros-noetic-velodyne-lidar-driver_2.7.0-23.01.30.1915_focal_amd64.deb
+
 # Clean-up
 WORKDIR /
 RUN apt-get clean

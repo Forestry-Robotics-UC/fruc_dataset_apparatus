@@ -1,105 +1,86 @@
 <?xml version="1.0"?>
-<robot name="sensor_box">
-  
-  <!-- ..Material Definitions.. -->
-  <material name="black">
-    <color rgba="0 0 0 1"/>
-  </material>
+
+<robot name="apparatus_box">
 
   <material name="white">
     <color rgba="1 1 1 1"/>
   </material>
+
+  <link name="base_link" > <!--REFERENCE FRAME FOR THE SENSOR BOX: TREE'S ROOT LINK-->
+      <visual>      
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://urdf_tutorial/my_meshes/apparatus_box.stl" scale="1 1 1"/>
+        </geometry>
+        <material name="white"/>
+      </visual>
+  </link>  
+
+<!-- APPARATUS LINKS -->
+
+  <link name="base_apparatus" />
+  <link name="xsens_link" />
+  <link name="realsense_link" />
+  <link name="mynt_bottom_screw_link" />
+  <link name="mynt_link" />
+  <link name="velarray_link" />
+  <link name="antenna_link" />
+ 
   
-  <!-- SENSOR BOX KIT -->
 
-    <link name="base_sensor_box" > <!--REFERENCE FRAME FOR THE SENSING KIT!-->
-        <visual>      
-         	<origin
-            xyz="0 0 0"
-            rpy="0 0 0" />
-          <geometry>
-	          <mesh filename="file:///rviz/mesh/sensor_box.stl" scale="0.001 0.001 0.001"/>
-          </geometry>
-          <material name="white"/>
-        </visual>
-    </link>  
+<!-- JOINT DEFINITIONS -->
+
+  <!-- CREATE THE BASE APPARATUS LINK-->
+  <joint name="base_link_to_base_apparatus" type="fixed">
+      <parent link="base_link" />
+      <child link="base_apparatus"/>
+      <origin xyz="0 0 0" rpy="0 0 -1.570796327" /> 
+  </joint>
+  
+
+  <!-- XSENS LINK --> 
+  <joint name="base_to_xsens" type="fixed">
+    <parent link="base_apparatus"/>
+    <child link="xsens_link"/>
+    <origin xyz="-0.017534 -0.029827 0.015160" rpy="0 0 0" />
+  </joint>
 
 
-<!-- SENSOR LINKS (from bottom to top) -->
+  <!-- REALSENSE LINK -->
+  <joint name="base_to_realsense" type="fixed">
+    <parent link="base_apparatus"/>
+    <child link="realsense_link"/>
+    <origin xyz="-0.045984 0.065623 0.0415" rpy="-1.570796327 0 0"/>
+  </joint>
 
-    <link name="aft_mapped"/>
-    <link name="base_link"/>
-    <link name="realsense_link"/>
-    <link name="realsense_bottom_screw_frame"/>
-    <link name="xsens_base"/>
-    <link name="xsens_frame"/>
-    <link name="mynteye_bottom_screw_frame" />
-    <link name="mynteye_link" />
-    <link name="livox_frame" />
 
-<!-- JOINT DEFINITIONS/STATIC TFs -->
+  <!-- MYNTEYE LINKS -->
+  <joint name="base to_bottom_mynt_screw" type="fixed">
+    <parent link="base_apparatus"/>
+    <child link="mynt_bottom_screw_link"/>
+    <origin xyz="-0.031088 0.014078 0.146" rpy="0 0 0.802851456"/>
+  </joint>
 
-    <!-- CREATE THE BASE LINK-->
-    <joint name="base_link_to_base_sensor_box" type="fixed">
-        <parent link="base_link" />
-        <child link="base_sensor_box"/>
-        <origin rpy="0 0 0" xyz="0 0 0" /> 
-    </joint>
+  <joint name="mynt_screw_to_mynt_frame" type="fixed">
+    <parent link="mynt_bottom_screw_link"/>
+    <child link="mynt_link"/>
+    <origin xyz="-0.059939 0.005 0.014600" rpy="0 0 0"/>
+  </joint>
 
-    <!-- REALSENSE LINKS/TFs-->
-    <joint name="base_sensor_box_to_realsense" type="fixed">
-        <parent link="base_sensor_box" />
-        <child link="realsense_bottom_screw_frame"/>
-        <origin rpy="0 0 0" xyz="0.03610 0.018 0.03174" /> 
-    </joint>
 
-    <!-- camera body, with origin at bottom screw mount -->
-    <joint name="realsense_bottom_screw_to_realsense" type="fixed">
-      <parent link="realsense_bottom_screw_frame"/>
-      <child link="realsense_link" />
-      <origin rpy="0 0 0" xyz="0.0149 0.00175 0.00125" /> 
-    </joint>
+  <!-- VELARRAY LINK -->
+  <joint name="base_to_velarray" type="fixed">
+    <parent link="base_apparatus"/>
+    <child link="velarray_link"/>
+    <origin xyz="0.041541 0.072093 0.269396" rpy="0 0 0"/>
+  </joint>
 
-    <!-- XSENS LINKS -->
-    <joint name="base_sensor_box_to_xsens" type="fixed">
-        <parent link="base_sensor_box" />
-        <child link="xsens_base"/>
-        <origin rpy="0 0 1.5708" xyz="-0.0285 0.0482 0" /> 
-    </joint>
 
-    <!-- Transforms the original Xsens frame to the middle of the base
-    This TF was taken from the following PR: https://github.com/ethz-asl/ethzasl_xsens_driver/pull/86 -->
-    <joint name="xsens_to_original_xsense" type="fixed">
-      <origin xyz="0.01735 0.0061 0.0095" rpy="0.0 0.0 0.0" />
-      <parent link="xsens_base" />
-      <child link="xsens_frame"/>
-    </joint>
-
-    <!-- MYNTEYE LINKS -->
-    <joint name="base_sensor_box_to_mynt_bottom_screw" type="fixed">
-        <parent link="base_sensor_box" />
-        <child link="mynteye_bottom_screw_frame"/>
-        <origin rpy="0 0 0" xyz="-0.0015 0.035 0.140" /> 
-    </joint>
-
-    <joint name="mynt_bottom_link_to_mynt_link" type="fixed">
-      <origin xyz="0.0 0.01 0.0136" rpy="0 0 0.78" />
-      <parent link="mynteye_bottom_screw_frame" />
-      <child link="mynteye_link"/>
-    </joint>
-
-    <!-- LIVOX MID-70 LINK-->
-    <joint name="base_sensor_box_to_livox" type="fixed">
-        <parent link="base_sensor_box" />
-        <child link="livox_frame"/>
-        <origin rpy="0 0 0" xyz="0.0404 0 0.264" /> 
-    </joint>
-
-        
-    <joint name="aft_mapped_to_base_link" type="fixed">
-        <parent link="aft_mapped" />
-        <child link="base_link"/>
-        <origin rpy="0 0 0" xyz="-0.0404 0 -0.264" /> 
-    </joint>
+    <!-- ANTENNA LINK -->
+  <joint name="base_to_antenna" type="fixed">
+    <parent link="base_apparatus"/>
+    <child link="antenna_link"/>
+    <origin xyz="-0.002106 -0.036673 0.3549896" rpy="0 0 0"/>
+  </joint>
 
 </robot>

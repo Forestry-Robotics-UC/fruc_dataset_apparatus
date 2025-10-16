@@ -1,0 +1,5 @@
+<launch>
+    <node name="velodyne_ros1_lidar_driver" pkg="velodyne_ros1_lidar_driver" type="velodyne_ros1_lidar_driver">
+        <param name="config_file" value="$(arg config_file)" />
+    </node>
+</launch>

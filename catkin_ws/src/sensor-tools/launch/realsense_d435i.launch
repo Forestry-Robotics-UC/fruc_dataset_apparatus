@@ -3,6 +3,9 @@
 <launch>
 
 	<param name="/realsense/aligned_depth_to_color/image_raw/compressedDepth/png_level" type="int" value="2" />
+	<param name="/realsense/color/image_raw/compressed/png_level" type="int" value="1" />
+	<param name="/realsense/infra1/image_rect_raw/compressed/png_level" type="int" value="2" />
+	<param name="/realsense/infra2/image_rect_raw/compressed/png_level" type="int" value="2" />
 
 	<include file="$(find realsense2_camera)/launch/rs_camera.launch">
 		<arg name="camera" value="realsense"/>
@@ -13,11 +16,12 @@
 		<arg name="color_height" value="480"/>
 		<arg name="depth_fps" value="30"/>
 		<arg name="enable_infra1" value="true"/>
-		<arg name="enable_infra2" value="false"/>
+		<arg name="enable_infra2" value="true"/>
 		<arg name="enable_gyro" value="true"/>
-		<arg name="gyro_fps" value="200" />
+		<arg name="gyro_fps" value="-1" />
 		<arg name="enable_accel" value="true"/>
-		<arg name="accel_fps" value="63" />
+		<arg name="unite_imu_method" value="linear_interpolation"/>
+		<arg name="accel_fps" value="-1" />
 		<arg name="align_depth" value="true"/>
 		<arg name="enable_pointcloud" value="false"/>
 		<arg name="initial_reset" value="false"/>

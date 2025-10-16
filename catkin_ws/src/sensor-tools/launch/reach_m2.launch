@@ -1,0 +1,29 @@
+
+<launch>
+    <!-- Use groups if you want to launch several nodes for multiple devices.
+    Make sure to use different param files for each sensor. -->
+
+	<arg name="comm_type" value="serial" />
+	<arg name="port" default="/dev/ttyACM1" />
+	<arg name="baudrate" default="115200" />
+	<arg name="timeout" default="1000" />
+	<arg name="polling_rate" default="1.0" />
+	<arg name="sentences" default="GGA,GST,ZDA,VTG" />
+	<arg name="pub_ignored" default="true" />
+	<arg name="parser_debug" default="false" />
+	<arg name="frame_id" default="gps" />
+
+    <group ns="reach_m2">
+	<node pkg="emlid_reach_ros" type="reach_node" name="reach_node" output="screen">
+		<param name="comm_type" value="$(arg comm_type)" />
+		<param name="port" value="$(arg port)" />
+		<param name="baudrate" value="$(arg baudrate)" />
+		<param name="timeout" value="$(arg timeout)" />
+		<param name="polling_rate" value="$(arg polling_rate)" />
+		<param name="sentences" value="$(arg sentences)" />
+		<param name="pub_ignored" value="$(arg pub_ignored)" />
+		<param name="parser_debug" value="$(arg parser_debug)" />
+		<param name="frame_id" value="$(arg frame_id)" />
+	</node>
+    </group>
+</launch>
