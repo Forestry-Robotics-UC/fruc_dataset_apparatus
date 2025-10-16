@@ -183,3 +183,6 @@ rosbags/
 
 # Velodyne Files
 *.pcap
+
+#Additional software
+docker/proprietary
