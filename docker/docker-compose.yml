@@ -13,7 +13,7 @@ services:
     networks:
       - ros2-net
     volumes:
-      - ../ros2_ws/:/ros2_ws
+      - ../ros2_ws/src:/ros2_ws/src
     command: [ "ros2", "launch", "sensor_tools", "rs_launch.py" ]
 
   #ROS2
@@ -31,7 +31,7 @@ services:
     networks:
       - ros2-net
     volumes:
-      - ../ros2_ws/:/ros2_ws
+      - ../ros2_ws/src:/ros2_ws/src
 
   ouster:
     build:
@@ -48,7 +48,8 @@ services:
     networks:
       - ros2-net
     volumes:
-      - ../ros2_ws/:/ros2_ws
+      - ../ros2_ws/src:/ros2_ws/src
+      - ../ros2_ws/shared:/ros2_ws/shared
     # command: [ "ros2", "launch", "ouster_ros", "sensor.launch.xml", "udp_profile_lidar:=RNG19_RFL8_SIG16_NIR16", "sensor_hostname:=169.254.49.182", "viz:=false", "lidar_port:=7502", "imu_port:=7503" ]
     command: [ "ros2", "launch", "ouster_ros", "driver.launch.py", "viz:=false", "params_file:=/ros2_ws/shared/ouster_config.yaml" ]
 
@@ -60,7 +61,7 @@ services:
     privileged: true
     container_name: emlid
     volumes:
-      - ../ros2_ws/:/ros2_ws
+      - ../ros2_ws/src:/ros2_ws/src
     group_add:
       - keep-groups
     devices:

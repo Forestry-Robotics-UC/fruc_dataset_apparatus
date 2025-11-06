@@ -121,8 +121,8 @@ RUN git clone -b ros2 https://github.com/ros-drivers/nmea_navsat_driver.git && r
 
 WORKDIR /docker_ws
 
-RUN sed -i "s#/dev/tty\.usbserial#/dev/ttyACM0#g" /docker_ws/src/nmea_navsat_driver/config/nmea_serial_driver.yaml
-RUN sed -i "s#/dev/ttyUSB0#/dev/ttyACM0#g" /docker_ws/src/nmea_navsat_driver/src/libnmea_navsat_driver/nodes/nmea_serial_driver.py
+# RUN sed -i "s#/dev/tty\.usbserial#/dev/ttyACM0#g" /docker_ws/src/nmea_navsat_driver/config/nmea_serial_driver.yaml
+# RUN sed -i "s#/dev/ttyUSB0#/dev/ttyACM0#g" /docker_ws/src/nmea_navsat_driver/src/libnmea_navsat_driver/nodes/nmea_serial_driver.py
 
 RUN . /opt/ros/$ROS_DISTRO/setup.sh && colcon build --packages-up-to nmea_navsat_driver
 
