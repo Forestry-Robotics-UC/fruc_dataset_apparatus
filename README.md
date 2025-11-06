@@ -49,6 +49,24 @@ To begin recording data on any Linux-based computer, follow the steps below:
 
    The recording system is now up and running, capturing data from the selected topics and storing it in a rosbag file under `fruc_dataset_apparatus/docker`. You can customize the behavior and settings of the recording system by modifying the `docker-compose.yml` file or other relevant configuration files within the repository.
 
+
+# How to Record with Steam Deck
+
+1. Power-on the Steam Deck
+2. Click on the "STEAM" Physical button (in-front bottom left);
+3. Click on "Power" and then "Switch to Desktop";
+
+<img width="451" height="514" alt="steam_boot" src="https://github.com/user-attachments/assets/b18542b7-f332-47c1-a9a0-fc1b31b275cf" />
+
+4. To **start** a Recording session click simultaneously on the in-back bottom left button with a long press (red circle with a 1) and in-back bottom right with a single click (green circle with a 2);
+5. Follow the prompted texts;
+6. To **stop** recording click simultaneously on the in-back bottom left button with a long press (red circle with a 1) and in-back top left with a single click (blue circle with a 3);
+
+<img width="592" height="239" alt="steam_deck" src="https://github.com/user-attachments/assets/0ce90f07-6e70-433b-a408-51156d218d85" />
+
+7. The ros2 bags will be under `~/fruc/fruc_dataset_apparatus/recordings/`
+
+
 --------------
 
 For more details, please check the Apparatus [Wiki](https://github.com/Forestry-Robotics-UC/fruc_dataset_apparatus/wiki)!
