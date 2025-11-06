@@ -22,8 +22,8 @@ fi
 topics=$(kdialog --checklist "Topics to record" \
     /imu/data "Xsens IMU" on \
     /heading "Heading" on \
-    /ouster/lidar_packets on \
-    /ouster/metadata on \
+    /ouster/lidar_packets "Ouster LiDAR Packets" on \
+    /ouster/metadata "Ouster Metadata" on \
     /ouster/imu "Ouster imu" off \
     /ouster/points "Ouster Points" off \
     /ouster/nearir_image "Ouster NearIR Image" off \
