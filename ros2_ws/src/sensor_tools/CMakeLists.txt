@@ -11,6 +11,36 @@ find_package(ament_cmake REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
+install(
+  DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}/
+)
+
+install(
+  DIRECTORY config
+  DESTINATION share/${PROJECT_NAME}/
+)
+
+
+# If the flag is enabled, define the macro, Needed for Realsense
+if(USE_LIFECYCLE_NODE)
+    find_package(rclcpp_lifecycle REQUIRED)
+    find_package(lifecycle_msgs REQUIRED)
+    list(APPEND dependencies rclcpp_lifecycle lifecycle_msgs)
+    list(APPEND targets 
+        rclcpp_lifecycle::rclcpp_lifecycle
+        lifecycle_msgs::lifecycle_msgs__rosidl_typesupport_cpp)
+    add_definitions(-DUSE_LIFECYCLE_NODE)
+    message("🚀 USE_LIFECYCLE_NODE is ENABLED")
+
+    # Create a configuration file for the launch file
+    file(WRITE "${CMAKE_BINARY_DIR}/global_settings.yaml"
+        "use_lifecycle_node: true\n")
+else()
+    file(WRITE "${CMAKE_BINARY_DIR}/global_settings.yaml"
+        "use_lifecycle_node: false\n")
+endif()
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights

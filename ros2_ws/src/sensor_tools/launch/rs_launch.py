@@ -1,3 +1,17 @@
+# Copyright 2023 Intel Corporation. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """Launch realsense2_camera node."""
 import os
 import yaml
@@ -20,20 +34,22 @@ configurable_parameters = [{'name': 'camera_name',                  'default': '
                            {'name': 'log_level',                    'default': 'info', 'description': 'debug log level [DEBUG|INFO|WARN|ERROR|FATAL]'},
                            {'name': 'output',                       'default': 'screen', 'description': 'pipe node output [screen|log]'},
                            {'name': 'enable_color',                 'default': 'true', 'description': 'enable color stream'},
-                           {'name': 'rgb_camera.color_profile',     'default': '0,0,0', 'description': 'color stream profile'},
+                           {'name': 'rgb_camera.global_time_enabled',   'default': 'true', 'description': 'Global Time'},
+                           {'name': 'rgb_camera.color_profile',     'default': '1280,720,30', 'description': 'color stream profile'},
                            {'name': 'rgb_camera.color_format',      'default': 'RGB8', 'description': 'color stream format'},
                            {'name': 'rgb_camera.enable_auto_exposure', 'default': 'true', 'description': 'enable/disable auto exposure for color image'},
                            {'name': 'enable_depth',                 'default': 'true', 'description': 'enable depth stream'},
-                           {'name': 'enable_infra',                 'default': 'true', 'description': 'enable infra0 stream'},
-                           {'name': 'enable_infra1',                'default': 'true', 'description': 'enable infra1 stream'},
-                           {'name': 'enable_infra2',                'default': 'true', 'description': 'enable infra2 stream'},
-                           {'name': 'depth_module.depth_profile',   'default': '0,0,0', 'description': 'depth stream profile'},
+                           {'name': 'enable_infra',                 'default': 'false', 'description': 'enable infra0 stream'},
+                           {'name': 'enable_infra1',                'default': 'false', 'description': 'enable infra1 stream'},
+                           {'name': 'enable_infra2',                'default': 'false', 'description': 'enable infra2 stream'},
+                           {'name': 'depth_module.global_time_enabled',   'default': 'true', 'description': 'Global Time'},
+                           {'name': 'depth_module.depth_profile',   'default': '1280,720,30', 'description': 'depth stream profile'},
                            {'name': 'depth_module.depth_format',    'default': 'Z16', 'description': 'depth stream format'},
                            {'name': 'depth_module.infra_profile',   'default': '0,0,0', 'description': 'infra streams (0/1/2) profile'},
                            {'name': 'depth_module.infra_format',    'default': 'RGB8', 'description': 'infra0 stream format'},
                            {'name': 'depth_module.infra1_format',   'default': 'Y8', 'description': 'infra1 stream format'},
                            {'name': 'depth_module.infra2_format',   'default': 'Y8', 'description': 'infra2 stream format'},
-                           {'name': 'depth_module.color_profile',   'default': '0,0,0', 'description': 'Depth module color stream profile for d405'},
+                           {'name': 'depth_module.color_profile',   'default': '1280,720,30', 'description': 'Depth module color stream profile for d405'},
                            {'name': 'depth_module.color_format',    'default': 'RGB8', 'description': 'color stream format for d405'},
                            {'name': 'depth_module.exposure',        'default': '8500', 'description': 'Depth module manual exposure value'},
                            {'name': 'depth_module.gain',            'default': '16', 'description': 'Depth module manual gain value'},
@@ -43,13 +59,13 @@ configurable_parameters = [{'name': 'camera_name',                  'default': '
                            {'name': 'depth_module.gain.1',          'default': '16', 'description': 'Depth module first gain value. Used for hdr_merge filter'},
                            {'name': 'depth_module.exposure.2',      'default': '1', 'description': 'Depth module second exposure value. Used for hdr_merge filter'},
                            {'name': 'depth_module.gain.2',          'default': '16', 'description': 'Depth module second gain value. Used for hdr_merge filter'},
-                           {'name': 'enable_sync',                  'default': 'false', 'description': "'enable sync mode'"},
+                           {'name': 'enable_sync',                  'default': 'true', 'description': "'enable sync mode'"},
                            {'name': 'depth_module.inter_cam_sync_mode',               'default': "0", 'description': '[0-Default, 1-Master, 2-Slave]'},
                            {'name': 'enable_rgbd',                  'default': 'false', 'description': "'enable rgbd topic'"},
                            {'name': 'enable_gyro',                  'default': 'false', 'description': "'enable gyro stream'"},
                            {'name': 'enable_accel',                 'default': 'false', 'description': "'enable accel stream'"},
                            {'name': 'gyro_fps',                     'default': '0', 'description': "''"},
-                           {'name': 'enable_motion',                'default': 'false', 'description': "'enable motion stream (IMU) for DDS devices'"},
+                           {'name': 'enable_motion',                'default': 'true', 'description': "'enable motion stream (IMU) for DDS devices'"},
                            {'name': 'accel_fps',                    'default': '0', 'description': "''"},
                            {'name': 'unite_imu_method',             'default': "0", 'description': '[0-None, 1-copy, 2-linear_interpolation]'},
                            {'name': 'clip_distance',                'default': '-2.', 'description': "''"},
@@ -100,7 +116,7 @@ def launch_setup(context, params, param_name_suffix=''):
     use_lifecycle_node = lifecycle_params.get("use_lifecycle_node", False)
 
     _output = LaunchConfiguration('output' + param_name_suffix)
-    
+
     # Dynamically choose Node or LifecycleNode
     node_action = launch_ros.actions.LifecycleNode if use_lifecycle_node else launch_ros.actions.Node
     log_message = "Launching as LifecycleNode" if use_lifecycle_node else "Launching as Normal ROS Node"

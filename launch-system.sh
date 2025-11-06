@@ -1,7 +1,5 @@
 #!/bin/bash
 
-
-
 #-----SELECT RECORDINGS NAME-------
 # Get the directory of the script
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -22,7 +20,8 @@ fi
 
 #SELECT TOPICS FOR RECORDING
 topics=$(kdialog --checklist "Topics to record" \
-    /imu/data "Xsens imu" on \
+    /imu/data "Xsens IMU" on \
+    /heading "Heading" on \
     /ouster/imu "Ouster imu" on \
     /ouster/points "Ouster Points" on \
     /ouster/nearir_image "Ouster NearIR Image" off \
@@ -30,6 +29,10 @@ topics=$(kdialog --checklist "Topics to record" \
     /ouster/reflec_image "Ouster Reflectivity Image" off \
     /camera/camera/color/image_raw "Realsense Color" on \
     /camera/camera/color/camera_info "Realsense Color Camera Info" on \
+    /camera/camera/align_depth_to_color/image_raw "Realsense Align Depth" on \
+    /camera/camera/depth/image_rect_raw "Realsense Depth" off \
+    /camera/camera/depth/metadata "Realsense Depth Metadata" on \
+    /camera/camera/depth/metadata "Realsense Extrinsics Color-Depth" on \
     /camera/camera/left/image_raw "Realsense IR Left" off \
     /camera/camera/right/image_raw "Realsense IR Right" off \
     /fix "GPS" on)
@@ -98,11 +101,12 @@ if [ $? -eq 0 ]; then
     echo $topics
     formatted_topics=$(echo $topics | awk '{for(i=1;i<=NF;i++) printf "\"%s\"%s", $i, (i==NF?"":", ")}')
 
+    echo $formatted_topics
+
     #Start recording stuff
     podman run --rm -t -d --name recording --network docker_ros2-net -v $SCRIPT_DIR/rosbags:/rosbags base ros2 bag record --storage-preset-profile $storage_profile $bag_limit_flag --topics $topics -o /rosbags/$recording_name
 
     podman run --rm -it --name monitoring --network docker_ros2-net base ros2 launch greenwave_monitor hz.launch.py topics:="[$formatted_topics]"
-
 
 else
     kdialog --sorry "Recording Cancelled."

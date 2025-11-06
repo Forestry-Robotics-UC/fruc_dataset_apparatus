@@ -14,6 +14,8 @@ services:
       - ros2-net
     volumes:
       - ../ros2_ws/:/ros2_ws
+    command: [ "ros2", "launch", "sensor_tools", "rs_launch.py" ]
+
 
   #ROS2
   xsens:
@@ -46,8 +48,7 @@ services:
       - ros2-net
     volumes:
       - ../ros2_ws/:/ros2_ws
-
-    command: [ "ros2", "launch", "ouster_ros", "sensor.launch.xml", "sensor_hostname:=169.254.49.182", "viz:=false", "lidar_port:=7502", "imu_port:=7503" ]
+    command: [ "ros2", "launch", "ouster_ros", "sensor.launch.xml", "udp_profile_lidar:=RNG19_RFL8_SIG16_NIR16", "sensor_hostname:=169.254.49.182", "viz:=false", "lidar_port:=7502", "imu_port:=7503" ]
 
   emlid:
     build:

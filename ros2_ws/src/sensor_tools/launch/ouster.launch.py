@@ -26,7 +26,7 @@ def generate_launch_description():
     ouster_ros_pkg_dir = get_package_share_directory('ouster_ros')
     sensor_tools_pkg_dir = get_package_share_directory('sensor_tools')
     default_params_file = \
-        Path(ouster_ros_pkg_dir) / 'config' / 'ouster.yaml'
+        Path(sensor_tools_pkg_dir) / 'config' / 'ouster.yaml'
     params_file = LaunchConfiguration('params_file')
     params_file_arg = DeclareLaunchArgument('params_file',
                                             default_value=str(
