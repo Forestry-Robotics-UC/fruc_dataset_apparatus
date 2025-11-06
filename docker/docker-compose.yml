@@ -16,7 +16,6 @@ services:
       - ../ros2_ws/:/ros2_ws
     command: [ "ros2", "launch", "sensor_tools", "rs_launch.py" ]
 
-
   #ROS2
   xsens:
     build:
@@ -27,6 +26,8 @@ services:
     privileged: true
     group_add:
       - keep-groups
+    devices:
+      - "/dev/ttyUSB0:/dev/ttyUSB0"
     networks:
       - ros2-net
     volumes:
@@ -63,9 +64,11 @@ services:
     group_add:
       - keep-groups
     devices:
-      - "/dev/ttyACM0:/dev/ttyACM0"
+      - "/dev/ttyACM1:/dev/ttyACM1"
     networks:
       - ros2-net
+    command: [ "ros2", "run", "nmea_navsat_driver", "nmea_serial_driver", "--ros-args", "-p", "port:=/dev/ttyACM1", "-p", "baud:=9600" ]
+    #ros2 run package_name executable_name --ros-args -p param_name:=param_value
 
   #Foxglove Bridge to vizualize topics from ROS2
   foxglove-bridge:
