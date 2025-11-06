@@ -109,7 +109,6 @@ RUN echo '#!/bin/bash\n\
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 
-# CMD [ "ros2", "launch", "ouster_ros", "sensor.launch.xml", "sensor_hostname:=$OUSTER_HOSTNAME", "viz:=false", "lidar_port:=7502", "imu_port:=7503" ]
 CMD [ "ros2", "launch", "ouster_ros", "driver.launch.py", "viz:=false", "params_file:=/ros2_ws/shared/ouster_config.yaml" ]
 
 #EMLID
@@ -121,11 +120,36 @@ RUN git clone -b ros2 https://github.com/ros-drivers/nmea_navsat_driver.git && r
 
 WORKDIR /docker_ws
 
-# RUN sed -i "s#/dev/tty\.usbserial#/dev/ttyACM0#g" /docker_ws/src/nmea_navsat_driver/config/nmea_serial_driver.yaml
-# RUN sed -i "s#/dev/ttyUSB0#/dev/ttyACM0#g" /docker_ws/src/nmea_navsat_driver/src/libnmea_navsat_driver/nodes/nmea_serial_driver.py
-
 RUN . /opt/ros/$ROS_DISTRO/setup.sh && colcon build --packages-up-to nmea_navsat_driver
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 
 CMD [ "ros2", "run", "nmea_navsat_driver", "nmea_serial_driver" ]
+
+#RECORDING
+FROM base as recording
+
+WORKDIR /docker_ws/src/
+
+RUN git clone -b ros2 --recurse-submodules https://github.com/ouster-lidar/ouster-ros.git && rosdep install --from-paths . -y --ignore-src
+
+WORKDIR /docker_ws/
+
+RUN . /opt/ros/$ROS_DISTRO/setup.sh && colcon build --packages-up-to ouster_ros
+
+RUN apt install -y ros-$ROS_DISTRO-librealsense2* ros-$ROS_DISTRO-realsense2-*
+
+RUN echo '#!/bin/bash\n\
+    set -e\n\
+    # Source ROS2\n\
+    source /opt/ros/$ROS_DISTRO/setup.bash\n\
+    # Source the docker container workspace if it exists\n\
+    if [ -d /docker_ws/src ]; then\n\
+        cd /docker_ws\n\
+        source /docker_ws/install/setup.bash\n\
+    fi\n\
+    exec "$@"' > /entrypoint.sh && chmod +x /entrypoint.sh
+
+ENTRYPOINT [ "/entrypoint.sh" ]
+
+CMD [ "/bin/bash" ]
