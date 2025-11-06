@@ -85,3 +85,19 @@ services:
 #    image: ghcr.io/foxglove/studio:latest
 #    container_name: foxglove-server
 #    network_mode: "host"
+
+recording:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: recording
+    privileged: true
+    container_name: recording
+    volumes:
+      - ../ros2_ws/src:/ros2_ws/src
+      - ../rosbags:/rosbags
+    group_add:
+      - keep-groups
+    networks:
+      - ros2-net
+    command: [ "/bin/bash" ]
