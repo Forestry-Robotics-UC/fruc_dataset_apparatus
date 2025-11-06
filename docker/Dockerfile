@@ -2,7 +2,6 @@ ARG ROS_DISTRO=jazzy
 
 FROM ros:$ROS_DISTRO-ros-base as base
 
-
 ENV PYTHON_VERSION=python3
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -90,10 +89,28 @@ WORKDIR /docker_ws/
 
 RUN . /opt/ros/$ROS_DISTRO/setup.sh && colcon build --packages-up-to ouster_ros
 
+RUN echo '#!/bin/bash\n\
+    set -e\n\
+    # Source ROS2\n\
+    source /opt/ros/$ROS_DISTRO/setup.bash\n\
+    # Source the docker container workspace if it exists\n\
+    if [ -d /docker_ws/src ]; then\n\
+        cd /docker_ws\n\
+        source /docker_ws/install/setup.bash\n\
+    fi\n\
+    # Source and compile the devel workspace if it exists\n\
+    if [ -d /ros2_ws/src ]; then\n\
+        cd /ros2_ws\n\
+        colcon build --symlink-install \n\
+        source /ros2_ws/install/setup.bash\n\
+    fi\n\
+    cp -f /ros2_ws/shared/replay_runtime.launch.xml /docker_ws/install/ouster_ros/share/ouster_ros/launch/\n\
+    exec "$@"' > /entrypoint.sh && chmod +x /entrypoint.sh
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 
-CMD [ "ros2", "launch", "ouster_ros", "sensor.launch.xml", "sensor_hostname:=$OUSTER_HOSTNAME", "viz:=false", "lidar_port:=7502", "imu_port:=7503" ]
+# CMD [ "ros2", "launch", "ouster_ros", "sensor.launch.xml", "sensor_hostname:=$OUSTER_HOSTNAME", "viz:=false", "lidar_port:=7502", "imu_port:=7503" ]
+CMD [ "ros2", "launch", "ouster_ros", "driver.launch.py", "viz:=false", "params_file:=/ros2_ws/shared/ouster_config.yaml" ]
 
 #EMLID
 FROM base as emlid

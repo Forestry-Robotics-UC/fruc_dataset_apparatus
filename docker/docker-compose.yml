@@ -39,8 +39,8 @@ services:
       target: ouster
     privileged: true
     container_name: ouster
-    env:
-      - OUSTER_HOSTNAME="169.254.49.182"
+    # env:
+    #   - OUSTER_HOSTNAME="169.254.49.182"
     ports:
       - "7502:7502/udp"
       - "7503:7503/udp"
@@ -48,7 +48,8 @@ services:
       - ros2-net
     volumes:
       - ../ros2_ws/:/ros2_ws
-    command: [ "ros2", "launch", "ouster_ros", "sensor.launch.xml", "udp_profile_lidar:=RNG19_RFL8_SIG16_NIR16", "sensor_hostname:=169.254.49.182", "viz:=false", "lidar_port:=7502", "imu_port:=7503" ]
+    # command: [ "ros2", "launch", "ouster_ros", "sensor.launch.xml", "udp_profile_lidar:=RNG19_RFL8_SIG16_NIR16", "sensor_hostname:=169.254.49.182", "viz:=false", "lidar_port:=7502", "imu_port:=7503" ]
+    command: [ "ros2", "launch", "ouster_ros", "driver.launch.py", "viz:=false", "params_file:=/ros2_ws/shared/ouster_config.yaml" ]
 
   emlid:
     build:
