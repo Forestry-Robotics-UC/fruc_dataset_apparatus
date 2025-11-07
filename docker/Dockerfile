@@ -131,6 +131,8 @@ FROM base as recording
 
 WORKDIR /docker_ws/src/
 
+RUN apt update --fix-missing
+
 RUN git clone -b ros2 --recurse-submodules https://github.com/ouster-lidar/ouster-ros.git && rosdep install --from-paths . -y --ignore-src
 
 WORKDIR /docker_ws/

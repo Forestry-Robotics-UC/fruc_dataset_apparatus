@@ -91,6 +91,8 @@ services:
         context: .
         dockerfile: Dockerfile
         target: recording
+      stdin_open: true # docker run -i
+      tty: true        # docker run -t
       privileged: true
       container_name: recording
       volumes:

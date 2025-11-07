@@ -99,7 +99,7 @@ if [ $? -eq 0 ]; then
 
     cd $SCRIPT_DIR/docker
 
-    podman-compose up -d
+    podman-compose up -d realsense xsens ouster emlid
 
     echo $topics
     formatted_topics=$(echo $topics | awk '{for(i=1;i<=NF;i++) printf "\"%s\"%s", $i, (i==NF?"":", ")}')
