@@ -133,24 +133,13 @@ WORKDIR /docker_ws/src/
 
 RUN apt update --fix-missing
 
-RUN git clone -b ros2 --recurse-submodules https://github.com/ouster-lidar/ouster-ros.git && rosdep install --from-paths . -y --ignore-src
+RUN git clone -b ros2 --recurse-submodules https://github.com/ouster-lidar/ouster-ros.git && git clone https://github.com/tu-darmstadt-ros-pkg/hector_recorder.git && rosdep install --from-paths . -y --ignore-src
 
 WORKDIR /docker_ws/
 
-RUN . /opt/ros/$ROS_DISTRO/setup.sh && colcon build --packages-up-to ouster_ros
+RUN . /opt/ros/$ROS_DISTRO/setup.sh && colcon build --packages-up-to ouster_ros hector_recorder hector_recorder_msgs
 
 RUN apt install -y ros-$ROS_DISTRO-librealsense2* ros-$ROS_DISTRO-realsense2-*
-
-RUN echo '#!/bin/bash\n\
-    set -e\n\
-    # Source ROS2\n\
-    source /opt/ros/$ROS_DISTRO/setup.bash\n\
-    # Source the docker container workspace if it exists\n\
-    if [ -d /docker_ws/src ]; then\n\
-        cd /docker_ws\n\
-        source /docker_ws/install/setup.bash\n\
-    fi\n\
-    exec "$@"' > /entrypoint.sh && chmod +x /entrypoint.sh
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 

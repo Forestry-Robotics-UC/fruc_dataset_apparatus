@@ -109,7 +109,9 @@ if [ $? -eq 0 ]; then
     #Start recording stuff
     # podman run --rm -t -d --name recording --network docker_ros2-net -v $SCRIPT_DIR/rosbags:/rosbags base ros2 bag record --storage-preset-profile $storage_profile $bag_limit_flag --topics $topics -o /rosbags/$recording_name
 
-    podman run --rm -it -d --name recording --network docker_ros2-net -v $SCRIPT_DIR/rosbags:/rosbags -v $SCRIPT_DIR/ros2_ws/shared:/ros2_ws/shared localhost/docker_recording ros2 bag record --storage-preset-profile $storage_profile $bag_limit_flag --topics $topics -o /rosbags/$recording_name
+    #podman run --rm -it -d --name recording --network docker_ros2-net -v $SCRIPT_DIR/rosbags:/rosbags -v $SCRIPT_DIR/ros2_ws/shared:/ros2_ws/shared localhost/docker_recording ros2 bag record --storage-preset-profile $storage_profile $bag_limit_flag --topics $topics -o /rosbags/$recording_name
+
+    podman run --rm -it --name recording --network docker_ros2-net -v $SCRIPT_DIR/rosbags:/rosbags -v $SCRIPT_DIR/ros2_ws/shared:/ros2_ws/shared localhost/docker_recording ros2 run hector_recorder record  $bag_limit_flag --topics $topics -o /rosbags/$recording_name
 
     #podman run --rm -it --name monitoring --network docker_ros2-net base ros2 topic hz $topics
 
