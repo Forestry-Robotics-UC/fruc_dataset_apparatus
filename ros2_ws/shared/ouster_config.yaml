@@ -4,3 +4,5 @@
     proc_mask: "RAW" # Only publish RAW packets
     lidar_port: 7502
     imu_port: 7503
+    phase_lock_enable: true
+    phase_lock_offset: 0
