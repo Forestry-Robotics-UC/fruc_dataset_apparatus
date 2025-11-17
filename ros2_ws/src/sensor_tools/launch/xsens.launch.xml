@@ -2,7 +2,7 @@
     <!-- parameters -->
     <arg name="device" default="auto"/>
     <arg name="enable_diagnostics" default="True"/>
-    <arg name="baudrate" default="0"/>
+    <arg name="baudrate" default="460800"/>
     <arg name="timeout" default="0.002"/>
     <arg name="initial_wait" default="0.1"/>
     <arg name="frame_id" default="/imu"/>

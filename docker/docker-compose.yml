@@ -32,6 +32,9 @@ services:
       - ros2-net
     volumes:
       - ../ros2_ws/src:/ros2_ws/src
+      - ../ros2_ws/shared:/ros2_ws/shared
+    command: [ "/bin/sh /ros2_ws/shared/scripts/xsens-launch.sh" ]
+
 
   ouster:
     build:
