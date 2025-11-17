@@ -68,7 +68,7 @@ if [ "$recording_limit_option" == "size" ]; then
         kdialog --error "Bag size input cancelled or invalid."
         exit 1
     fi
-    
+
     # Convert GB to bytes using awk (rounded down to integer)
     bag_limit_bytes=$(awk -v gb="$bag_limit_value" 'BEGIN { print int(gb * 1073741824) }')
     bag_limit_flag="-b $bag_limit_bytes"
@@ -92,7 +92,7 @@ fi
 confirm=$(kdialog --yesno "Start recording named:\n '$recording_name'\n\nTopics:\n$topics\n\nLimit: $bag_limit_flag\nStorage: --storage-preset-profile $storage_profile" \
     --yes-label "Start Recording" --no-label "Cancel")
 
-if [ $? -eq 0 ]; then 
+if [ $? -eq 0 ]; then
     kdialog --msgbox "Recording Started!"
     # Insert the commands/bring up of everything! TODO
     #Launch the compose files
@@ -106,12 +106,8 @@ if [ $? -eq 0 ]; then
 
     echo $formatted_topics
 
-    #Start recording stuff
-    # podman run --rm -t -d --name recording --network docker_ros2-net -v $SCRIPT_DIR/rosbags:/rosbags base ros2 bag record --storage-preset-profile $storage_profile $bag_limit_flag --topics $topics -o /rosbags/$recording_name
-
-    #podman run --rm -it -d --name recording --network docker_ros2-net -v $SCRIPT_DIR/rosbags:/rosbags -v $SCRIPT_DIR/ros2_ws/shared:/ros2_ws/shared localhost/docker_recording ros2 bag record --storage-preset-profile $storage_profile $bag_limit_flag --topics $topics -o /rosbags/$recording_name
-
-    podman run --rm -it --name recording --network docker_ros2-net -v $SCRIPT_DIR/rosbags:/rosbags -v $SCRIPT_DIR/ros2_ws/shared:/ros2_ws/shared localhost/docker_recording ros2 run hector_recorder record  $bag_limit_flag --topics $topics -o /rosbags/$recording_name
+    #Start recording stuff and, when finished, save bag info to file
+    podman run --rm -it --name recording --network docker_ros2-net -v $SCRIPT_DIR/rosbags:/rosbags -v $SCRIPT_DIR/ros2_ws/shared:/ros2_ws/shared localhost/docker_recording /bin/bash -c "ros2 run hector_recorder record $bag_limit_flag --topics $topics -o /rosbags/$recording_name && echo \$(ros2 bag info /rosbags/$recording_name) > /rosbags/$recording_name/info.txt"
 
     #podman run --rm -it --name monitoring --network docker_ros2-net base ros2 topic hz $topics
 
