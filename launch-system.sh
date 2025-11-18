@@ -21,7 +21,9 @@ fi
 #SELECT TOPICS FOR RECORDING
 topics=$(kdialog --checklist "Topics to record" \
     /imu/data "Xsens IMU" on \
+    /imu/mag "Xsens IMU" on \
     /heading "Heading" on \
+    /tf_static "Static TF" on \
     /ouster/lidar_packets "Ouster LiDAR Packets" on \
     /ouster/imu_packets "Ouster IMU Packets" on \
     /ouster/metadata "Ouster Metadata" on \
@@ -32,10 +34,13 @@ topics=$(kdialog --checklist "Topics to record" \
     /ouster/reflec_image "Ouster Reflectivity Image" off \
     /camera/camera/color/image_raw "Realsense Color" on \
     /camera/camera/color/camera_info "Realsense Color Camera Info" on \
+    /camera/aligned_depth_to_color/camera_info "Realsense Aligned Depth to Color" on \
     /camera/camera/aligned_depth_to_color/image_raw "Realsense Align Depth" on \
     /camera/camera/depth/image_rect_raw "Realsense Depth" off \
+    /camera/color/metadata "Realsense Color Metadata" on \
     /camera/camera/depth/metadata "Realsense Depth Metadata" on \
-    /camera/camera/depth/metadata "Realsense Extrinsics Color-Depth" on \
+    /camera/extrinsics/depth_to_color "Realsense Extrinsics Depth to Color" on \
+    /camera/extrinsics/depth_to_depth "Realsense Extrinsics Depth to Depth" on \
     /camera/camera/left/image_raw "Realsense IR Left" off \
     /camera/camera/right/image_raw "Realsense IR Right" off \
     /fix "GPS" on)
