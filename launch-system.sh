@@ -68,7 +68,7 @@ if [ $? -ne 0 ]; then
 fi
 
 if [ "$recording_limit_option" == "size" ]; then
-    bag_limit_value=$(kdialog --inputbox "Enter max bag size (GB):" "10")
+    bag_limit_value=$(kdialog --inputbox "Enter max bag size (GB):" "5")
     if [ $? -ne 0 ] || [ -z "$bag_limit_value" ]; then
         kdialog --error "Bag size input cancelled or invalid."
         exit 1
@@ -87,7 +87,7 @@ else
 fi
 
 #SELECT THE COMPRESSION PROFILE
-storage_profile=$(kdialog --combobox "Select storage preset profile:" none fastwrite zstd_fast zstd_small --default zstd_fast)
+storage_profile=$(kdialog --combobox "Select storage preset profile:" none fastwrite zstd_fast zstd_small --default none)
 if [ $? -ne 0 ] || [ -z "$storage_profile" ]; then
     kdialog --error "No storage preset selected."
     exit 1
