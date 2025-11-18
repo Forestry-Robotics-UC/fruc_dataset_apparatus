@@ -34,13 +34,13 @@ topics=$(kdialog --checklist "Topics to record" \
     /ouster/reflec_image "Ouster Reflectivity Image" off \
     /camera/camera/color/image_raw "Realsense Color" on \
     /camera/camera/color/camera_info "Realsense Color Camera Info" on \
-    /camera/aligned_depth_to_color/camera_info "Realsense Aligned Depth to Color" on \
+    /camera/camera/aligned_depth_to_color/camera_info "Realsense Aligned Depth to Color" on \
     /camera/camera/aligned_depth_to_color/image_raw "Realsense Align Depth" on \
     /camera/camera/depth/image_rect_raw "Realsense Depth" off \
-    /camera/color/metadata "Realsense Color Metadata" on \
+    /camera/camera/color/metadata "Realsense Color Metadata" on \
     /camera/camera/depth/metadata "Realsense Depth Metadata" on \
-    /camera/extrinsics/depth_to_color "Realsense Extrinsics Depth to Color" on \
-    /camera/extrinsics/depth_to_depth "Realsense Extrinsics Depth to Depth" on \
+    /camera/camera/extrinsics/depth_to_color "Realsense Extrinsics Depth to Color" on \
+    /camera/camera/extrinsics/depth_to_depth "Realsense Extrinsics Depth to Depth" on \
     /camera/camera/left/image_raw "Realsense IR Left" off \
     /camera/camera/right/image_raw "Realsense IR Right" off \
     /fix "GPS" on)
