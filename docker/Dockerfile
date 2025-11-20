@@ -144,3 +144,18 @@ RUN apt install -y ros-$ROS_DISTRO-librealsense2* ros-$ROS_DISTRO-realsense2-*
 ENTRYPOINT [ "/entrypoint.sh" ]
 
 CMD [ "/bin/bash" ]
+
+#STATE PUBLISHER
+FROM base as publisher
+
+WORKDIR /docker_ws/src/
+
+RUN apt update --fix-missing
+
+RUN apt install ros-jazzy-robot-state-publisher ros-jazzy-joint-state-publisher ros-jazzy-xacro
+
+WORKDIR /docker_ws/
+
+ENTRYPOINT [ "/entrypoint.sh" ]
+
+CMD [ "/bin/bash" ]

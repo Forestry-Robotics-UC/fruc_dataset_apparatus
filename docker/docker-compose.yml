@@ -105,3 +105,20 @@ services:
       networks:
         - ros2-net
       command: [ "/bin/bash" ]
+
+
+  publisher:
+      build:
+        context: .
+        dockerfile: Dockerfile
+        target: publisher
+      stdin_open: true # docker run -i
+      tty: true        # docker run -t
+      privileged: true
+      container_name: publisher
+      volumes:
+        - ../ros2_ws/src:/ros2_ws/src
+        - ../ros2_ws/shared:/ros2_ws/shared
+      networks:
+        - ros2-net
+      command: [ "/bin/bash" ]    
