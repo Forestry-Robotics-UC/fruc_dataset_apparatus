@@ -67,7 +67,7 @@
         </visual>
     </link>
 
-    <link name="xsens_sensor_link" />
+    <link name="xsens_imu" />
 
     <!-- REALSENSE STRUCTURE -->
     <link name="realsense_structure_link">
@@ -95,10 +95,10 @@
         <origin xyz="${xsens_x_offset} ${xsens_y_offset} ${xsens_z_offset}" rpy="0 0 0" />
     </joint>
 
-    <joint name="xsens_structure_to_xsens_sensor" type="fixed">
+    <joint name="xsens_structure_to_xsens_imu" type="fixed">
         <parent link="xsens_structure_link" />
-        <child link="xsens_sensor_link" />
-        <origin xyz="${xsens_sensor_x_offset} ${xsens_sensor_y_offset} ${xsens_sensor_z_offset}" rpy="0 0 0" />
+        <child link="xsens_imu" />
+        <origin xyz="${xsens_sensor_x_offset} ${xsens_sensor_y_offset} ${xsens_sensor_z_offset}" rpy="${pi} 0 0" />
     </joint>
 
     <!-- OUSTER JOINTS -->
