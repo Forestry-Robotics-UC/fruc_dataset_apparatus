@@ -121,4 +121,4 @@ services:
         - ../ros2_ws/shared:/ros2_ws/shared
       networks:
         - ros2-net
-      command: [ "/bin/bash" ]    
+      command: [ "ros2", "run", "robot_state_publisher", "robot_state_publisher", "--ros-args", "-p", "robot_description:='$(xacro /ros2_ws/shared/apparatus.urdf.xacro)'" ]

@@ -152,10 +152,10 @@ WORKDIR /docker_ws/src/
 
 RUN apt update --fix-missing
 
-RUN apt install ros-jazzy-robot-state-publisher ros-jazzy-joint-state-publisher ros-jazzy-xacro
+RUN apt install ros-jazzy-xacro
 
 WORKDIR /docker_ws/
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 
-CMD [ "/bin/bash" ]
+CMD [ "ros2", "run", "robot_state_publisher", "robot_state_publisher", "--ros-args", "-p", "robot_description:='\$(xacro /ros2_ws/shared/apparatus.urdf.xacro)'" ]

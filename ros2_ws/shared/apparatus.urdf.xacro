@@ -1,0 +1,170 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robot">
+
+    <!-- Property quick access -->
+    <xacro:property name="ouster_height" value="${0.066214/2}" />
+    <xacro:property name="ouster_radius" value="${0.074388/1.95}" />
+    <xacro:property name="ouster_z_offset" value="0.206440" />
+
+    <xacro:property name="xsens_length" value="${0.0566}" />
+    <xacro:property name="xsens_width" value="${0.0409}" />
+    <xacro:property name="xsens_height" value="${0.0272}" />
+
+    <xacro:property name="xsens_x_offset" value="${-0.015121}" />
+    <xacro:property name="xsens_y_offset" value="${-0.046950}" />
+    <xacro:property name="xsens_z_offset" value="${0.0722 - xsens_height / 2}" />
+
+    <xacro:property name="xsens_sensor_x_offset" value="${0.02725 - xsens_length / 2}" />
+    <xacro:property name="xsens_sensor_y_offset" value="${0.01275 - xsens_width / 2}" />
+    <xacro:property name="xsens_sensor_z_offset" value="${0.01766 - xsens_height / 2}" />
+
+    <xacro:property name="realsense_x_offset" value="-0.023" />
+    <xacro:property name="realsense_y_offset" value="0.058" />
+    <xacro:property name="realsense_z_offset" value="0.082" />
+
+    <xacro:property name="realsense_sensor_x_offset" value="-0.008" />
+    <xacro:property name="realsense_sensor_y_offset" value="0" />
+    <xacro:property name="realsense_sensor_z_offset" value="0" />
+
+    <material name="orange">
+        <color rgba="1 0.3 0.1 1"/>
+    </material>
+
+    <!-- BASE LINK -->
+    <link name="base_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="apperatus.obj" />
+            </geometry>
+        </visual>
+    </link>
+
+    <!-- OUSTER STRUCTURE -->
+    <link name="ouster_structure_link">
+        <visual>
+            <geometry>
+                <cylinder length="${ouster_height}" radius="${ouster_radius}" />
+            </geometry>
+            <material name="orange" />
+        </visual>
+    </link>
+
+    <!-- Changed from ouster_sensor_link to os_sensor -->
+    <link name="os_sensor" />
+    
+    <!-- Additional Ouster frames from diagram -->
+    <link name="os_lidar" />
+    <link name="os_imu" />
+
+    <!-- XSENS STRUCTURE -->
+    <link name="xsens_structure_link">
+        <visual>
+            <geometry>
+                <box size="${xsens_length} ${xsens_width} ${xsens_height}" />
+            </geometry>
+            <material name="orange" />
+        </visual>
+    </link>
+
+    <link name="xsens_sensor_link" />
+
+    <!-- REALSENSE STRUCTURE -->
+    <link name="realsense_structure_link">
+        <visual>
+            <geometry>
+                <box size=".01 .01 .01" />
+            </geometry>
+            <material name="orange" />
+        </visual>
+    </link>
+
+    <!-- Changed from realsense_sensor_link to camera_link -->
+    <link name="camera_link" />
+    
+    <!-- Additional camera frames from diagram -->
+    <link name="camera_depth_frame" />
+    <link name="camera_depth_optical_frame" />
+    <link name="camera_color_frame" />
+    <link name="camera_color_optical_frame" />
+
+    <!-- XSENS JOINTS -->
+    <joint name="base_link_to_xsens_structure" type="fixed">
+        <parent link="base_link" />
+        <child link="xsens_structure_link" />
+        <origin xyz="${xsens_x_offset} ${xsens_y_offset} ${xsens_z_offset}" rpy="0 0 0" />
+    </joint>
+
+    <joint name="xsens_structure_to_xsens_sensor" type="fixed">
+        <parent link="xsens_structure_link" />
+        <child link="xsens_sensor_link" />
+        <origin xyz="${xsens_sensor_x_offset} ${xsens_sensor_y_offset} ${xsens_sensor_z_offset}" rpy="0 0 0" />
+    </joint>
+
+    <!-- OUSTER JOINTS -->
+    <joint name="base_link_to_ouster_structure" type="fixed">
+        <parent link="base_link" />
+        <child link="ouster_structure_link" />
+        <origin xyz="0 0 ${ouster_z_offset}" rpy="0 0 0" />
+    </joint>
+
+    <!-- Changed child to os_sensor -->
+    <joint name="ouster_structure_to_os_sensor" type="fixed">
+        <parent link="ouster_structure_link" />
+        <child link="os_sensor" />
+        <origin xyz="0 0 0" rpy="0 0 ${pi}" />
+    </joint>
+    
+    <!-- Additional Ouster joints -->
+    <joint name="os_sensor_to_os_lidar" type="fixed">
+        <parent link="os_sensor" />
+        <child link="os_lidar" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+    </joint>
+    
+    <joint name="os_sensor_to_os_imu" type="fixed">
+        <parent link="os_sensor" />
+        <child link="os_imu" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+    </joint>
+
+    <!-- REALSENSE JOINTS -->
+    <joint name="base_link_to_realsense_structure" type="fixed">
+        <parent link="base_link" />
+        <child link="realsense_structure_link" />
+        <origin xyz="${realsense_x_offset} ${realsense_y_offset} ${realsense_z_offset}" rpy="0 0 0" />
+    </joint>
+
+    <!-- Changed child to camera_link -->
+    <joint name="realsense_structure_to_camera_link" type="fixed">
+        <parent link="realsense_structure_link" />
+        <child link="camera_link" />
+        <origin xyz="${realsense_sensor_x_offset} ${realsense_sensor_y_offset} ${realsense_sensor_z_offset}" 
+                rpy="${-pi/2} 0 0" />
+    </joint>
+    
+    <!-- Additional camera joints -->
+    <joint name="camera_link_to_depth_frame" type="fixed">
+        <parent link="camera_link" />
+        <child link="camera_depth_frame" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+    </joint>
+    
+    <joint name="camera_depth_frame_to_optical" type="fixed">
+        <parent link="camera_depth_frame" />
+        <child link="camera_depth_optical_frame" />
+        <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
+    </joint>
+    
+    <joint name="camera_link_to_color_frame" type="fixed">
+        <parent link="camera_link" />
+        <child link="camera_color_frame" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+    </joint>
+    
+    <joint name="camera_color_frame_to_optical" type="fixed">
+        <parent link="camera_color_frame" />
+        <child link="camera_color_optical_frame" />
+        <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
+    </joint>
+</robot>
