@@ -45,7 +45,7 @@
     <joint name="base_link_to_os_sensor" type="fixed">
         <parent link="base_link" />
         <child link="os_sensor" />
-        <origin xyz="0 0 ${ouster_z_offset}" rpy="0 0 ${pi}" />
+        <origin xyz="0 0 ${ouster_z_offset}" rpy="0 0 0" />
     </joint>
     
     <joint name="os_sensor_to_os_lidar" type="fixed">
@@ -64,7 +64,7 @@
     <joint name="base_link_to_xsens_imu" type="fixed">
         <parent link="base_link" />
         <child link="xsens_imu" />
-        <origin xyz="${xsens_x_offset} ${xsens_y_offset} ${xsens_z_offset}" rpy="0 0 ${-pi}" />
+        <origin xyz="${xsens_x_offset} ${xsens_y_offset} ${xsens_z_offset}" rpy="0 0 0" />
     </joint>
 
     <!-- REALSENSE JOINTS -->
