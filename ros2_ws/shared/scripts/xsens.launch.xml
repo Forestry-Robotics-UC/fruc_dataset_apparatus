@@ -5,7 +5,7 @@
     <arg name="baudrate" default="460800"/>
     <arg name="timeout" default="0.002"/>
     <arg name="initial_wait" default="0.1"/>
-    <arg name="frame_id" default="/imu"/>
+    <arg name="frame_id" default="xsens_imu"/>
     <arg name="frame_local" default="ENU"/>
     <arg name="no_rotation_duration" default="0"/>
     <arg name="angular_velocity_covariance_diagonal" default="[0.0004, 0.0004, 0.0004]"/>
