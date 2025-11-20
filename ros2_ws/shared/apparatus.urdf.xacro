@@ -98,7 +98,7 @@
     <joint name="xsens_structure_to_xsens_imu" type="fixed">
         <parent link="xsens_structure_link" />
         <child link="xsens_imu" />
-        <origin xyz="${xsens_sensor_x_offset} ${xsens_sensor_y_offset} ${xsens_sensor_z_offset}" rpy="0 0 0" />
+        <origin xyz="${xsens_sensor_x_offset} ${xsens_sensor_y_offset} ${xsens_sensor_z_offset}" rpy="0 0 ${pi}" />
     </joint>
 
     <!-- OUSTER JOINTS -->
