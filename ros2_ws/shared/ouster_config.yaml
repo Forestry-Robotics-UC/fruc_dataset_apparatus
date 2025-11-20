@@ -1,7 +1,7 @@
 /ouster/os_driver:
   ros__parameters:
     sensor_hostname: "169.254.49.182" 
-    proc_mask: "RAW" # Only publish RAW packets
+    proc_mask: "IMU|PCL" # Only publish RAW|IMU|PCL packets
     lidar_port: 7502
     imu_port: 7503
     phase_lock_enable: true
