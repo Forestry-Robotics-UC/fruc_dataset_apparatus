@@ -25,6 +25,7 @@ topics=$(kdialog --checklist "Topics to record" \
     /heading "Heading" on \
     /tf_static "Static TF" on \
     /tf "TF" on \
+    /robot_description "Robot Description" on \
     /ouster/lidar_packets "Ouster LiDAR Packets" off \
     /ouster/imu_packets "Ouster IMU Packets" off \
     /ouster/metadata "Ouster Metadata" on \
@@ -105,7 +106,7 @@ if [ $? -eq 0 ]; then
 
     cd $SCRIPT_DIR/docker
 
-    podman-compose up -d realsense xsens ouster emlid
+    podman-compose up -d realsense xsens ouster emlid publisher
 
     echo $topics
     formatted_topics=$(echo $topics | awk '{for(i=1;i<=NF;i++) printf "\"%s\"%s", $i, (i==NF?"":", ")}')

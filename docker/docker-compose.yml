@@ -81,7 +81,7 @@ services:
       - ros2-net
     ports:
       - "9092:8765"
-  
+
   #Vizualization Container
 #  viz:
 #    image: ghcr.io/foxglove/studio:latest
@@ -106,7 +106,6 @@ services:
         - ros2-net
       command: [ "/bin/bash" ]
 
-
   publisher:
       build:
         context: .
@@ -119,6 +118,7 @@ services:
       volumes:
         - ../ros2_ws/src:/ros2_ws/src
         - ../ros2_ws/shared:/ros2_ws/shared
+        - ../rosbags:/rosbags
       networks:
         - ros2-net
       command: >
@@ -126,3 +126,20 @@ services:
         xacro /ros2_ws/shared/apparatus.urdf.xacro > /tmp/robot_description.urdf;
         ros2 run robot_state_publisher robot_state_publisher /tmp/robot_description.urdf;
         "
+  replay_latest:
+      build:
+        context: .
+        dockerfile: Dockerfile
+        target: replay_latest
+      stdin_open: true # Keep stdin open (docker run -i)
+      tty: true        # Allocate a pseudo-TTY (docker run -t)
+      privileged: true # Use with caution; consider specific capabilities instead
+      container_name: replay_latest
+      volumes:
+        - ../ros2_ws/src:/ros2_ws/src
+        - ../ros2_ws/shared:/ros2_ws/shared
+        - ../rosbags:/rosbags
+      networks:
+        - ros2-net
+      command: ["/bin/bash", "-c", "ros2 bag play $(ls -td /rosbags/*/ | head -n 1)"]
+      # ^ Use a list format for the command to avoid YAML parsing issues
