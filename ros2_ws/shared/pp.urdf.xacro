@@ -8,6 +8,10 @@
     <xacro:property name="xsens_y_offset" value="${-0.046950}" />
     <xacro:property name="xsens_z_offset" value="0.0586" />
 
+    <xacro:property name="realsense_x_offset" value="-0.031" />
+    <xacro:property name="realsense_y_offset" value="0.058" />
+    <xacro:property name="realsense_z_offset" value="0.082" />
+
     <material name="orange">
         <color rgba="1 0.3 0.1 1"/>
     </material>
@@ -30,7 +34,11 @@
     <!-- XSENS LINKS -->
     <link name="xsens_imu" />
 
-    <!-- ONLY the calibrated camera link -->
+    <!-- REALSENSE LINKS -->
+    <link name="camera_link" />
+    <link name="camera_depth_frame" />
+    <link name="camera_depth_optical_frame" />
+    <link name="camera_color_frame" />
     <link name="camera_color_optical_frame" />
 
     <!-- OUSTER JOINTS -->
@@ -59,13 +67,37 @@
         <origin xyz="${xsens_x_offset} ${xsens_y_offset} ${xsens_z_offset}" rpy="0 0 0" />
     </joint>
 
-    <!-- CALIBRATED JOINT -->
-    <joint name="joint_os_lidar_to_camera_color_optical_frame" type="fixed">
-        <parent link="os_lidar" />
+    <!-- CALIBRATED CAMERA JOINT -->
+    <joint name="joint_os_sensor_to_camera_link" type="fixed">
+        <parent link="os_sensor" />
+        <child link="camera_link" />
+        <origin xyz="-0.018599905044461885 0.08479126746983127 -0.09082252118430068"
+                rpy="0.0013625367954899733 0.003069697768602153 1.558103710329454" />
+    </joint>
+
+    <!-- REALSENSE JOINTS -->
+    <joint name="camera_link_to_depth_frame" type="fixed">
+        <parent link="camera_link" />
+        <child link="camera_depth_frame" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+    </joint>
+    
+    <joint name="camera_depth_frame_to_optical" type="fixed">
+        <parent link="camera_depth_frame" />
+        <child link="camera_depth_optical_frame" />
+        <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
+    </joint>
+    
+    <joint name="camera_link_to_color_frame" type="fixed">
+        <parent link="camera_link" />
+        <child link="camera_color_frame" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+    </joint>
+    
+    <joint name="camera_color_frame_to_optical" type="fixed">
+        <parent link="camera_color_frame" />
         <child link="camera_color_optical_frame" />
-        <origin
-            xyz="0.05568036442772917 -0.0430253294736255 -0.14051977811283808"
-            rpy="-1.5751960229616002 -0.002342193450216837 3.130102872835444" />
+        <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
     </joint>
 
 </robot>

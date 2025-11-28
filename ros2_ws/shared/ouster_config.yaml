@@ -6,3 +6,7 @@
     imu_port: 7503
     phase_lock_enable: true
     phase_lock_offset: 0
+    timestamp_mode: "TIME_FROM_ROS_TIME" #"TIME_FROM_SYNC_PULSE_IN" # TIME_FROM_ROS_TIME
+    
+    
+    #ros2 topic echo /ouster/points | grep "header" -A5
