@@ -47,8 +47,9 @@ services:
     ports:
       - "7502:7502/udp"
       - "7503:7503/udp"
-    networks:
-      - ros2-net
+    #networks:
+    #  - ros2-net
+    network_mode: "host"
     volumes:
       - ../ros2_ws/src:/ros2_ws/src
       - ../ros2_ws/shared:/ros2_ws/shared
@@ -143,22 +144,3 @@ services:
         - ros2-net
       #command: [ "/bin/bash", "-c", "ros2 bag play $(ls -td /rosbags/*/ | head -n 1)" ]
       # ^ Use a list format for the command to avoid YAML parsing issues
-     
-  ouster_mod:
-      build:
-        context: .
-        dockerfile: Dockerfile
-        target: ouster
-      privileged: true
-      container_name: ouster_mod
-      # env:
-      #   - OUSTER_HOSTNAME="169.254.49.182"
-      ports:
-        - "7502:7502/udp"
-        - "7503:7503/udp"
-      networks:
-        - ros2-net
-      volumes:
-        - ../ros2_ws/src:/ros2_ws/src
-        - ../ros2_ws/shared:/ros2_ws/shared
-      command: [ "/bin/bash", "-c", "/ros2_ws/shared/ouster_mod_entrypoint.sh" ]
