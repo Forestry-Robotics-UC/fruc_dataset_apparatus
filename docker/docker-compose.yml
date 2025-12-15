@@ -47,9 +47,8 @@ services:
     ports:
       - "7502:7502/udp"
       - "7503:7503/udp"
-    #networks:
-    #  - ros2-net
-    network_mode: "host"
+    networks:
+     - ros2-net
     volumes:
       - ../ros2_ws/src:/ros2_ws/src
       - ../ros2_ws/shared:/ros2_ws/shared
