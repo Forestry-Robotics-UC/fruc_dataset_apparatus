@@ -17,10 +17,6 @@ ouster/os_driver:
     # 512x20, 1024x10, 1024x20, 2048x10, 4096x5 }. Leave empty to remain on
     # current the lidar mode.
     lidar_mode: ''
-    lidar_port: 7502
-    imu_port: 7503
-    phase_lock_enable: true
-    phase_lock_offset: 0
     # timestamp_mode[optional]: method used to timestamp measurements; possible
     # values:
     # - TIME_FROM_INTERNAL_OSC
@@ -46,11 +42,11 @@ ouster/os_driver:
     # lidar_port[optional]: port value should be in the range [0, 65535]. If you
     # use 0 as the port value then the first avaliable port number will be
     # assigned.
-    lidar_port: 0
+    lidar_port: 7502
     # imu_port[optional]: port value should be in the range [0, 65535]. If you
     # use 0 as the port value then the first avaliable port number will be
     # assigned.
-    imu_port: 0
+    imu_port: 7503
     # sensor_frame[optional]: name to use when referring to the sensor frame.
     sensor_frame: os_sensor
     # lidar_frame[optional]: name to use when referring to the lidar frame.
@@ -129,4 +125,7 @@ ouster/os_driver:
     # mask_path[optional]: path to an image file that will be used to mask parts of the
     # pointcloud.
     mask_path: ''
+
+    phase_lock_enable: true
+    phase_lock_offset: 0
 
