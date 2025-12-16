@@ -1,145 +1,166 @@
 networks:
   ros2-net:
+    driver: bridge
 
 services:
-  #ROS2
+  # Base image - foundation for other services
+  base:
+    build:
+      context: .
+      dockerfile: Dockerfile.base
+      target: base
+      args:
+        ROS_DISTRO: jazzy
+    image: ros2-apparatus-base:jazzy
+    stdin_open: true
+    tty: true
+    privileged: true
+    container_name: ros2-apparatus-base
+
+  # Sensor Services
   realsense:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.realsense
       target: realsense
+    image: ros2-apparatus-realsense:jazzy
+    stdin_open: true
+    tty: true
     privileged: true
-    container_name: realsense
+    container_name: ros2-apparatus-realsense
     networks:
       - ros2-net
     volumes:
-      - ../ros2_ws/src:/ros2_ws/src
-    command: [ "ros2", "launch", "sensor_tools", "rs_launch.py", "use_sim_time:=True"]
+      - ./shared:/shared
+    command:
+      - ros2
+      - launch
+      - rslaunch
+      - rs_launch.py
+      - use_sim_time:=False
 
-  #ROS2
   xsens:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.xsens
       target: xsens
-    container_name: xsens
+    image: ros2-apparatus-xsens:jazzy
+    stdin_open: true
+    tty: true
     privileged: true
-    group_add:
-      - keep-groups
+    container_name: ros2-apparatus-xsens
     devices:
-      - "/dev/ttyUSB0:/dev/ttyUSB0"
+      - /dev/ttyUSB0:/dev/ttyUSB0
     networks:
       - ros2-net
     volumes:
-      - ../ros2_ws/src:/ros2_ws/src
-      - ../ros2_ws/shared:/ros2_ws/shared
-    command: [ "/ros2_ws/shared/scripts/xsens-launch.sh" ]
+      - ./shared:/shared
+    command:
+      - /shared/scripts/xsens-launch.sh
 
   ouster:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.ouster
       target: ouster
+    image: ros2-apparatus-ouster:jazzy
+    stdin_open: true
+    tty: true
     privileged: true
-    container_name: ouster
-    # env:
-    #   - OUSTER_HOSTNAME="169.254.49.182"
+    container_name: ros2-apparatus-ouster
     ports:
-      - "7502:7502/udp"
-      - "7503:7503/udp"
+      - 7502:7502/udp
+      - 7503:7503/udp
     networks:
-     - ros2-net
+      - ros2-net
     volumes:
-      - ../ros2_ws/src:/ros2_ws/src
-      - ../ros2_ws/shared:/ros2_ws/shared
-    # command: [ "ros2", "launch", "ouster_ros", "sensor.launch.xml", "udp_profile_lidar:=RNG19_RFL8_SIG16_NIR16", "sensor_hostname:=169.254.49.182", "viz:=false", "lidar_port:=7502", "imu_port:=7503" ]
-    command: [ "ros2", "launch", "ouster_ros", "driver.launch.py", "viz:=false", "params_file:=/ros2_ws/shared/ouster_config.yaml" ]
+      - ./shared:/shared
+    command:
+      - ros2
+      - launch
+      - ouster_ros
+      - driver.launch.py
+      - viz:=false
+      - params_file:=/shared/ouster_config.yaml
 
   emlid:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.emlid
       target: emlid
+      args:
+        BASE_IMAGE: ros2-apparatus-base:jazzy
+        ROS_DISTRO: jazzy
+    image: ros2-apparatus-emlid:jazzy
+    depends_on:
+      - base
+    stdin_open: true
+    tty: true
     privileged: true
-    container_name: emlid
-    volumes:
-      - ../ros2_ws/src:/ros2_ws/src
-    group_add:
-      - keep-groups
+    container_name: ros2-apparatus-emlid
     devices:
-      - "/dev/ttyACM1:/dev/ttyACM1"
+      - /dev/ttyACM1:/dev/ttyACM1
     networks:
       - ros2-net
-    command: [ "ros2", "run", "nmea_navsat_driver", "nmea_serial_driver", "--ros-args", "-p", "port:=/dev/ttyACM1", "-p", "baud:=9600" ]
-    #ros2 run package_name executable_name --ros-args -p param_name:=param_value
+    volumes:
+      - ./shared:/shared
+    command:
+      - ros2
+      - run
+      - nmea_navsat_driver
+      - nmea_serial_driver
+      - --ros-args
+      - -p
+      - port:=/dev/ttyACM1
+      - -p
+      - baud:=9600
 
-  #Foxglove Bridge to vizualize topics from ROS2
+  # Visualization Services
   foxglove-bridge:
-    image: mjpc13/foxglove-bridge
-    container_name: foxglove-bridge
+    image: mjpc13/foxglove-bridge:latest
+    stdin_open: true
+    tty: true
+    container_name: ros2-apparatus-foxglove-bridge
     networks:
       - ros2-net
     ports:
-      - "9092:8765"
+      - 9092:8765
 
-  #Vizualization Container
-#  viz:
-#    image: ghcr.io/foxglove/studio:latest
-#    container_name: foxglove-server
-#    network_mode: "host"
-
+  # Utility Services
   recording:
-      build:
-        context: .
-        dockerfile: Dockerfile
-        target: recording
-      stdin_open: true # docker run -i
-      tty: true        # docker run -t
-      privileged: true
-      container_name: recording
-      volumes:
-        - ../ros2_ws/src:/ros2_ws/src
-        - ../rosbags:/rosbags
-      group_add:
-        - keep-groups
-      networks:
-        - ros2-net
-      command: [ "/bin/bash" ]
+    build:
+      context: .
+      dockerfile: Dockerfile.recording
+      target: recording
+    image: ros2-apparatus-recording:jazzy
+    stdin_open: true
+    tty: true
+    privileged: true
+    container_name: ros2-apparatus-recording
+    networks:
+      - ros2-net
+    volumes:
+      - ./shared:/shared
+      - ../rosbags:/rosbags
+    command:
+      - /bin/bash
 
   publisher:
-      build:
-        context: .
-        dockerfile: Dockerfile
-        target: publisher
-      stdin_open: true # docker run -i
-      tty: true        # docker run -t
-      privileged: true
-      container_name: publisher
-      volumes:
-        - ../ros2_ws/src:/ros2_ws/src
-        - ../ros2_ws/shared:/ros2_ws/shared
-        - ../rosbags:/rosbags
-      networks:
-        - ros2-net
-      command: >
-        /bin/bash -c "
-        xacro /ros2_ws/shared/apparatus.urdf.xacro > /tmp/robot_description.urdf;
-        ros2 run robot_state_publisher robot_state_publisher /tmp/robot_description.urdf;
-        "
-  replay_latest:
-      build:
-        context: .
-        dockerfile: Dockerfile
-        target: replay_latest
-      stdin_open: true # Keep stdin open (docker run -i)
-      tty: true        # Allocate a pseudo-TTY (docker run -t)
-      privileged: true # Use with caution; consider specific capabilities instead
-      container_name: replay_latest
-      volumes:
-        - ../ros2_ws/src:/ros2_ws/src
-        - ../ros2_ws/shared:/ros2_ws/shared
-        - ../rosbags:/rosbags
-      networks:
-        - ros2-net
-      #command: [ "/bin/bash", "-c", "ros2 bag play $(ls -td /rosbags/*/ | head -n 1)" ]
-      # ^ Use a list format for the command to avoid YAML parsing issues
+    build:
+      context: .
+      dockerfile: Dockerfile.publisher
+      target: publisher
+    image: ros2-apparatus-publisher:jazzy
+    stdin_open: true
+    tty: true
+    privileged: true
+    container_name: ros2-apparatus-publisher
+    networks:
+      - ros2-net
+    volumes:
+      - ./shared:/shared
+    command: >
+      /bin/bash -c "
+      xacro /shared/apparatus.urdf.xacro > /tmp/robot_description.urdf &&
+      ros2 run robot_state_publisher robot_state_publisher /tmp/robot_description.urdf
+      "

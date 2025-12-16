@@ -115,9 +115,6 @@ if [ $? -eq 0 ]; then
 
     #Start recording stuff and, when finished, save bag info to file
     podman run --rm -it --name recording --network docker_ros2-net -v $SCRIPT_DIR/rosbags:/rosbags -v $SCRIPT_DIR/ros2_ws/shared:/ros2_ws/shared localhost/docker_recording /bin/bash -c "ros2 run hector_recorder record $bag_limit_flag --topics $topics -o /rosbags/$recording_name && echo \$(ros2 bag info /rosbags/$recording_name) > /rosbags/$recording_name/info.txt"
-
-    #podman run --rm -it --name monitoring --network docker_ros2-net base ros2 topic hz $topics
-
 else
     kdialog --sorry "Recording Cancelled."
 fi

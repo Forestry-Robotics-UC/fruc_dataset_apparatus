@@ -1,0 +1,64 @@
+FROM ros2-apparatus-base:jazzy AS realsense
+LABEL maintainer="Duarte Cruz <duarte.cruz@isr.uc.pt>"
+SHELL ["/bin/bash","-c"]
+ARG ROS_DISTRO=jazzy
+ENV ROS_DISTRO=$ROS_DISTRO
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y \
+    build-essential \
+    git \
+    cmake \
+    wget \
+    libx11-dev \
+    libxrandr-dev \
+    libxinerama-dev \
+    libxcursor-dev \
+    libgl1-mesa-dev \
+    libglu1-mesa-dev \
+    libglfw3-dev \
+    libusb-1.0-0-dev \
+    ros-${ROS_DISTRO}-cv-bridge \
+    ros-${ROS_DISTRO}-image-transport \
+    ros-${ROS_DISTRO}-diagnostic-updater \
+    ros-${ROS_DISTRO}-sensor-msgs \
+    ros-${ROS_DISTRO}-std-srvs && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Clone and build librealsense with DKMS
+WORKDIR /
+RUN git clone https://github.com/IntelRealSense/librealsense.git
+
+WORKDIR /librealsense/build
+RUN cmake .. -DFORCE_RSUSB_BACKEND=true -DCMAKE_BUILD_TYPE=Release && \
+    make -j$(nproc) && \
+    make install && \
+    ldconfig
+
+RUN apt update --fix-missing
+
+# Set up workspace
+WORKDIR /docker_ws/src/
+
+# Clone realsense ROS package
+RUN git clone https://github.com/IntelRealSense/realsense-ros.git
+
+# Copy custom launch files
+COPY build/rslaunch rslaunch
+
+# Install ROS dependencies using rosdep
+WORKDIR /docker_ws/
+RUN . /opt/ros/$ROS_DISTRO/setup.sh && \
+    rosdep update && \
+    rosdep install --from-paths src -y --ignore-src \
+    --skip-keys "librealsense2"
+
+# Build the workspace
+RUN . /opt/ros/$ROS_DISTRO/setup.sh && \
+    colcon build --symlink-install
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["bash"]

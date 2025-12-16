@@ -1,0 +1,17 @@
+#STATE PUBLISHER
+FROM ros2-apparatus-base:jazzy AS publisher
+
+RUN apt update --fix-missing
+
+WORKDIR /docker_ws/src/
+
+RUN apt install ros-jazzy-xacro
+
+WORKDIR /docker_ws/
+
+# Build the workspace
+RUN . /opt/ros/$ROS_DISTRO/setup.sh && \
+    colcon build --symlink-install
+
+ENTRYPOINT [ "/entrypoint.sh" ]
+CMD [ "ros2", "run", "robot_state_publisher", "robot_state_publisher", "--ros-args", "-p", "robot_description:='\$(xacro /ros2_ws/shared/apparatus.urdf.xacro)'" ]
