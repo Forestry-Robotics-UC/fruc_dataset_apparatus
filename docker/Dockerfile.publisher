@@ -14,4 +14,4 @@ RUN . /opt/ros/$ROS_DISTRO/setup.sh && \
     colcon build --symlink-install
 
 ENTRYPOINT [ "/entrypoint.sh" ]
-CMD [ "ros2", "run", "robot_state_publisher", "robot_state_publisher", "--ros-args", "-p", "robot_description:='\$(xacro /ros2_ws/shared/apparatus.urdf.xacro)'" ]
+CMD [ "ros2", "run", "robot_state_publisher", "robot_state_publisher", "--ros-args", "-p", "robot_description:='\$(xacro /shared/apparatus.urdf.xacro)'" ]
