@@ -47,7 +47,7 @@ WORKDIR /docker_ws/src/
 RUN git clone https://github.com/IntelRealSense/realsense-ros.git
 
 # Copy custom launch files
-COPY build/rslaunch rslaunch
+COPY ./build/rslaunch rslaunch
 
 # Install ROS dependencies using rosdep
 WORKDIR /docker_ws/
