@@ -31,7 +31,7 @@ services:
     networks:
       - ros2-net
     volumes:
-      - ./shared:/shared
+      - ./docker_shared:/shared
     command:
       - ros2
       - launch
@@ -54,7 +54,7 @@ services:
     networks:
       - ros2-net
     volumes:
-      - ./shared:/shared
+      - ./docker_shared:/shared
     command:
       - /shared/scripts/xsens-launch.sh
 
@@ -74,7 +74,7 @@ services:
     networks:
       - ros2-net
     volumes:
-      - ./shared:/shared
+      - ./docker_shared:/shared
     command:
       - ros2
       - launch
@@ -103,7 +103,7 @@ services:
     networks:
       - ros2-net
     volumes:
-      - ./shared:/shared
+      - ./docker_shared:/shared
     command:
       - ros2
       - run
@@ -140,7 +140,7 @@ services:
     networks:
       - ros2-net
     volumes:
-      - ./shared:/shared
+      - ./docker_shared:/shared
       - ../rosbags:/rosbags
     command:
       - /bin/bash
@@ -158,7 +158,7 @@ services:
     networks:
       - ros2-net
     volumes:
-      - ./shared:/shared
+      - ./docker_shared:/shared
     command: >
       /bin/bash -c "
       xacro /shared/apparatus.urdf.xacro > /tmp/robot_description.urdf &&

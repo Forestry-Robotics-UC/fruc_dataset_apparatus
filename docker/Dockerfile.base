@@ -13,7 +13,7 @@ RUN apt-get update \
     && apt-get install -y git $PYTHON_VERSION-colcon-common-extensions $PYTHON_VERSION-pip $PYTHON_VERSION-rosdep
 
 # FILE TO SOURCE THE ENVIRONMENT AND COMPILE ANY DEVEL WS THAT MIGHT EXIST
-COPY ./build/entrypoint.sh /entrypoint.sh
+COPY ./docker_build/entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh
 

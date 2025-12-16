@@ -11,7 +11,7 @@ RUN git clone -b ros2 --recurse-submodules https://github.com/ouster-lidar/ouste
 
 WORKDIR /docker_ws/
 
-COPY ./build/replay_runtime.launch.xml /docker_ws/src/ouster_ros/launch/
+COPY ./docker_build/replay_runtime.launch.xml /docker_ws/src/ouster_ros/launch/
 
 RUN . /opt/ros/$ROS_DISTRO/setup.sh && colcon build --packages-up-to ouster_ros
 
