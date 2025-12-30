@@ -1,4 +1,8 @@
+version: '3.9'
+
 networks:
+  link-local-net:
+    external: true
   ros2-net:
     driver: bridge
 
@@ -16,6 +20,10 @@ services:
     tty: true
     privileged: true
     container_name: ros2-apparatus-base
+    networks:
+      - ros2-net
+    volumes:
+      - ./docker_shared:/shared
 
   # Sensor Services
   realsense:
@@ -73,6 +81,7 @@ services:
       - 7503:7503/udp
     networks:
       - ros2-net
+      - link-local-net
     volumes:
       - ./docker_shared:/shared
     command:

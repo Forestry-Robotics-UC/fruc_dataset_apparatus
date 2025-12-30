@@ -16,7 +16,7 @@ ouster/os_driver:
     # lidar_mode[optional]: resolution and rate; possible values: { 512x10,
     # 512x20, 1024x10, 1024x20, 2048x10, 4096x5 }. Leave empty to remain on
     # current the lidar mode.
-    lidar_mode: "512x20"
+    lidar_mode: "1024x20"
     # timestamp_mode[optional]: method used to timestamp measurements; possible
     # values:
     # - TIME_FROM_INTERNAL_OSC
@@ -63,7 +63,7 @@ ouster/os_driver:
     pub_static_tf: true
     # proc_mask[optional]: use any combination of the 6 flags IMG, PCL, IMU, SCAN
     # RAW and TLM to enable or disable their respective messages.
-    proc_mask: "RAW|IMU|PCL" # Only publish RAW|IMU|PCL packets
+    proc_mask: "RAW" # Only publish RAW|IMU|PCL packets
     # scan_ring[optional]: use this parameter in conjunction with the SCAN flag
     # to select which beam of the LidarScan to use when producing the LaserScan
     # message. Choose a value the range [0, sensor_beams_count).
@@ -101,7 +101,7 @@ ouster/os_driver:
     persist_config: false
     # attempt_config[optional]: attempting to reconnect to the sensor after
     # connection loss or sensor powered down
-    attempt_reconnect: true
+    attempt_reconnect: false
     # dormant_period_between_reconnects[optional]: wait time in seconds between
     # reconnection attempts
     dormant_period_between_reconnects: 1.0

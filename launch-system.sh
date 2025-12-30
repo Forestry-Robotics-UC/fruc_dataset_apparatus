@@ -26,11 +26,11 @@ topics=$(kdialog --checklist "Topics to record" \
     /tf_static "Static TF" on \
     /tf "TF" on \
     /robot_description "Robot Description" on \
-    /ouster/lidar_packets "Ouster LiDAR Packets" off \
-    /ouster/imu_packets "Ouster IMU Packets" off \
+    /ouster/lidar_packets "Ouster LiDAR Packets" on \
+    /ouster/imu_packets "Ouster IMU Packets" on \
     /ouster/metadata "Ouster Metadata" on \
-    /ouster/imu "Ouster imu" on \
-    /ouster/points "Ouster Points" on \
+    /ouster/imu "Ouster IMU" off \
+    /ouster/points "Ouster Points" off \
     /ouster/nearir_image "Ouster NearIR Image" off \
     /ouster/range_image "Ouster Range Image" off \
     /ouster/reflec_image "Ouster Reflectivity Image" off \
@@ -100,21 +100,19 @@ confirm=$(kdialog --yesno "Start recording named:\n '$recording_name'\n\nTopics:
     --yes-label "Start Recording" --no-label "Cancel")
 
 if [ $? -eq 0 ]; then
-    kdialog --msgbox "Recording Started!"
-    # Insert the commands/bring up of everything! TODO
     #Launch the compose files
 
     cd $SCRIPT_DIR/docker
+    
+    #Start recording stuff and, when finished, save bag info to file
+    bash -c podman run --rm -it --name recording --network docker_ros2-net -v $SCRIPT_DIR/rosbags:/rosbags -v $SCRIPT_DIR/docker/docker_shared:/shared localhost/docker_recording /bin/bash -c "ros2 run hector_recorder record $bag_limit_flag --topics $topics -o /rosbags/$recording_name && echo \$(ros2 bag info /rosbags/$recording_name) > /rosbags/$recording_name/info.txt"
 
-    podman-compose up -d realsense xsens ouster emlid publisher
+    podman-compose up -d publisher ouster realsense xsens emlid
 
     echo $topics
     formatted_topics=$(echo $topics | awk '{for(i=1;i<=NF;i++) printf "\"%s\"%s", $i, (i==NF?"":", ")}')
 
     echo $formatted_topics
-
-    #Start recording stuff and, when finished, save bag info to file
-    podman run --rm -it --name recording --network docker_ros2-net -v $SCRIPT_DIR/rosbags:/rosbags -v $SCRIPT_DIR/docker/docker_shared:/shared localhost/docker_recording /bin/bash -c "ros2 run hector_recorder record $bag_limit_flag --topics $topics -o /rosbags/$recording_name && echo \$(ros2 bag info /rosbags/$recording_name) > /rosbags/$recording_name/info.txt"
 else
     kdialog --sorry "Recording Cancelled."
 fi
