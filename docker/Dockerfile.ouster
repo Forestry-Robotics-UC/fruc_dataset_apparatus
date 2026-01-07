@@ -7,7 +7,7 @@ RUN apt update --fix-missing
 
 WORKDIR /docker_ws/src/
 
-RUN git clone -b ros2 --recurse-submodules https://github.com/ouster-lidar/ouster-ros.git && rosdep install --from-paths . -y --ignore-src
+RUN git clone -b ros2 --recurse-submodules https://github.com/errorcodecritical/ouster-ros && rosdep install --from-paths . -y --ignore-src
 
 WORKDIR /docker_ws/
 

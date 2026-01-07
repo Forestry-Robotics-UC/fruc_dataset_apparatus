@@ -107,6 +107,8 @@ if [ $? -eq 0 ]; then
     #Start recording stuff and, when finished, save bag info to file
     bash -c podman run --rm -it --name recording --network docker_ros2-net -v $SCRIPT_DIR/rosbags:/rosbags -v $SCRIPT_DIR/docker/docker_shared:/shared localhost/docker_recording /bin/bash -c "ros2 run hector_recorder record $bag_limit_flag --topics $topics -o /rosbags/$recording_name && echo \$(ros2 bag info /rosbags/$recording_name) > /rosbags/$recording_name/info.txt"
 
+    sleep 2 # Give some time to the recording container to fully start
+
     podman-compose up -d publisher ouster realsense xsens emlid
 
     echo $topics
