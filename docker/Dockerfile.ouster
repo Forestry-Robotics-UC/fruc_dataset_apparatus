@@ -3,11 +3,11 @@ FROM ros2-apparatus-base:jazzy AS ouster
 
 ENV OUSTER_HOSTNAME="169.254.49.182"
 
-RUN apt update --fix-missing
-
 WORKDIR /docker_ws/src/
 
-RUN git clone -b ros2 --recurse-submodules https://github.com/errorcodecritical/ouster-ros && rosdep install --from-paths . -y --ignore-src
+RUN apt update --fix-missing
+RUN git clone -b ros2 --recurse-submodules https://github.com/errorcodecritical/ouster-ros 
+RUN rosdep update && rosdep install --from-paths . -y --ignore-src
 
 WORKDIR /docker_ws/
 

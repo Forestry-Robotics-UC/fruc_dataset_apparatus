@@ -1,9 +1,9 @@
 # XSENS IMU
 FROM ros2-apparatus-base:jazzy AS xsens
 
-RUN apt update --fix-missing
-
 WORKDIR /docker_ws/src/
+
+RUN apt update --fix-missing
 
 RUN git clone -b $ROS_DISTRO https://github.com/norlab-ulaval/norlab_xsens_driver.git && rosdep install --from-paths . --ignore-src  -r -y 
 

@@ -151,8 +151,7 @@ services:
     volumes:
       - ./docker_shared:/shared
       - ../rosbags:/rosbags
-    command:
-      - /bin/bash
+    command: ${SCRIPT_ARGS:-}
 
   publisher:
     build:

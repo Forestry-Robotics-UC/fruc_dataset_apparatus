@@ -1,9 +1,9 @@
 #EMLID
 FROM ros2-apparatus-base:jazzy AS emlid
 
-RUN apt update --fix-missing
-
 WORKDIR /docker_ws/src/
+
+RUN apt update --fix-missing
 
 RUN git clone -b ros2 https://github.com/ros-drivers/nmea_navsat_driver.git && rosdep install --from-paths . -y --ignore-src
 

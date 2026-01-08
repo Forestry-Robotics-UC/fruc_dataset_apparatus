@@ -1,11 +1,9 @@
 #STATE PUBLISHER
 FROM ros2-apparatus-base:jazzy AS publisher
 
-RUN apt update --fix-missing
-
 WORKDIR /docker_ws/src/
 
-RUN apt install ros-jazzy-xacro
+RUN apt update --fix-missing && apt install ros-jazzy-xacro
 
 WORKDIR /docker_ws/
 
