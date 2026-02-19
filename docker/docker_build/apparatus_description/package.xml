@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>apparatus_description</name>
+  <version>0.0.1</version>
+  <description>CURT Mini robot URDF description package with Ouster OS1, RealSense D435, and MAPIR Survey3 cameras</description>
+  <maintainer email="todo@example.com">TODO</maintainer>
+  <license>TODO</license>
+
+  <url type="website">https://github.com/todo/curt_mini</url>
+  <author email="todo@example.com">TODO</author>
+
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <depend>launch</depend>
+  <depend>launch_ros</depend>
+  <depend>robot_state_publisher</depend>
+  <depend>joint_state_publisher</depend>
+  <depend>joint_state_publisher_gui</depend>
+  <depend>xacro</depend>
+  <depend>ros2_control</depend>
+  <depend>gazebo_ros2_control</depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

@@ -1,15 +1,27 @@
 #EMLID
-FROM ros2-apparatus-base:jazzy AS emlid
+FROM ros:jazzy-ros-base
+
+RUN apt update --fix-missing && apt install -y \
+    build-essential \
+    cmake \
+    git \
+    python3-colcon-common-extensions \
+    python3-pip \
+    python3-rosdep \
+    python3-rosinstall-generator \
+    python3-vcstool
 
 WORKDIR /docker_ws/src/
-
-RUN apt update --fix-missing
 
 RUN git clone -b ros2 https://github.com/ros-drivers/nmea_navsat_driver.git && rosdep install --from-paths . -y --ignore-src
 
 WORKDIR /docker_ws
 
-RUN . /opt/ros/$ROS_DISTRO/setup.sh && colcon build --packages-up-to nmea_navsat_driver
+RUN . /opt/ros/jazzy/setup.sh && colcon build --packages-up-to nmea_navsat_driver
+
+COPY ./docker_build/entrypoint.sh /entrypoint.sh
+
+RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 CMD [ "ros2", "run", "nmea_navsat_driver", "nmea_serial_driver" ]

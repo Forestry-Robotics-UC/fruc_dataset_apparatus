@@ -101,20 +101,17 @@ confirm=$(kdialog --yesno "Start recording named:\n '$recording_name'\n\nTopics:
 
 if [ $? -eq 0 ]; then
     #Launch the compose files
+    cd "$SCRIPT_DIR/docker"
 
-    cd $SCRIPT_DIR/docker
-    
-    #Start recording stuff and, when finished, save bag info to file
-    bash -c podman run --rm -it --name recording --network docker_ros2-net -v $SCRIPT_DIR/rosbags:/rosbags -v $SCRIPT_DIR/docker/docker_shared:/shared localhost/docker_recording /bin/bash -c "ros2 run hector_recorder record $bag_limit_flag --topics $topics -o /rosbags/$recording_name && echo \$(ros2 bag info /rosbags/$recording_name) > /rosbags/$recording_name/info.txt"
+    (sleep 8 && podman-compose up -d publisher ouster realsense xsens emlid > /dev/null 2>&1) &
 
-    sleep 2 # Give some time to the recording container to fully start
+    cmd1="ros2 run hector_recorder record $bag_limit_flag --topics $topics -o /rosbags/$recording_name"
+    cmd2="ros2 bag info /rosbags/$recording_name > /rosbags/$recording_name/info.txt"
 
-    podman-compose up -d publisher ouster realsense xsens emlid
-
-    echo $topics
-    formatted_topics=$(echo $topics | awk '{for(i=1;i<=NF;i++) printf "\"%s\"%s", $i, (i==NF?"":", ")}')
-
-    echo $formatted_topics
+    #Start recording container
+    podman-compose run --rm recording $cmd1
+    #After recording is done, get the bag info
+    podman-compose run --rm recording /bin/bash -c "$cmd2"
 else
     kdialog --sorry "Recording Cancelled."
 fi

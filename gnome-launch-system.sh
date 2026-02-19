@@ -96,13 +96,15 @@ if [ $? -eq 0 ]; then
     #Launch the compose files
     cd "$SCRIPT_DIR/docker"
 
-    (sleep 8 && docker-compose up -d publisher ouster realsense xsens emlid > /dev/null 2>&1) &
+    (sleep 8 && docker compose up -d publisher ouster realsense xsens emlid > /dev/null 2>&1) &
 
     cmd1="ros2 run hector_recorder record $bag_limit_flag --topics $topics -o /rosbags/$recording_name"
     cmd2="ros2 bag info /rosbags/$recording_name > /rosbags/$recording_name/info.txt"
 
     #Start recording container
-    docker-compose run --rm recording $cmd1
+    docker compose run --rm recording $cmd1
+    #After recording is done, get the bag info
+    docker compose run --rm recording /bin/bash -c "$cmd2"
 else
     zenity --info --text="Recording Cancelled."
 fi

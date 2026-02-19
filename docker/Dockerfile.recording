@@ -1,9 +1,19 @@
 #RECORDING
-FROM ros2-apparatus-base:jazzy AS recording
+FROM ros:jazzy-ros-base
+
+RUN apt update && apt install -y --no-install-recommends \
+    build-essential \
+    cmake \
+    git \
+    python3-colcon-common-extensions \
+    python3-pip \
+    python3-rosdep \
+    python3-rosinstall-generator \
+    python3-vcstool \
+    unzip \
+    wget
 
 WORKDIR /docker_ws/src/
-
-RUN apt update --fix-missing
 
 RUN rm -rf ouster-ros && \
     git clone -b ros2 --filter=blob:none --no-checkout https://github.com/errorcodecritical/ouster-ros && \
@@ -21,7 +31,11 @@ WORKDIR /docker_ws/
 
 RUN apt install -y libboost-all-dev
 
-RUN . /opt/ros/$ROS_DISTRO/setup.sh && colcon build --packages-up-to ouster_sensor_msgs hector_recorder hector_recorder_msgs
+RUN . /opt/ros/jazzy/setup.sh && colcon build --packages-up-to ouster_sensor_msgs hector_recorder hector_recorder_msgs
+
+COPY ./docker_build/entrypoint.sh /entrypoint.sh
+
+RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 CMD [ "/bin/bash" ]

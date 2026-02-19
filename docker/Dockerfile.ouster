@@ -1,17 +1,32 @@
 # Ouster LiDAR
-FROM ros2-apparatus-base:jazzy AS ouster
+FROM ros:jazzy-ros-base
 
 ENV OUSTER_HOSTNAME="169.254.49.182"
 
+RUN apt update && apt install -y --no-install-recommends \
+    build-essential \
+    cmake \
+    git \
+    python3-colcon-common-extensions \
+    python3-pip \
+    python3-rosdep \
+    python3-rosinstall-generator \
+    python3-vcstool \
+    unzip \
+    wget
+
 WORKDIR /docker_ws/src/
 
-RUN apt update --fix-missing
 RUN git clone -b ros2 --recurse-submodules https://github.com/errorcodecritical/ouster-ros 
 RUN rosdep update && rosdep install --from-paths . -y --ignore-src
 
 WORKDIR /docker_ws/
 
-RUN . /opt/ros/$ROS_DISTRO/setup.sh && colcon build --packages-up-to ouster_ros
+RUN . /opt/ros/jazzy/setup.sh && colcon build --packages-up-to ouster_ros
+
+COPY ./docker_build/entrypoint.sh /entrypoint.sh
+
+RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 CMD [ "ros2", "launch", "ouster_ros", "driver.launch.py", "viz:=false", "params_file:=/shared/ouster_config.yaml" ]

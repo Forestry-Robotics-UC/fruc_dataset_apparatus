@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 # Source ROS2
-source /opt/ros/$ROS_DISTRO/setup.bash
+source /opt/ros/jazzy/setup.bash
 # Source the docker container workspace if it exists
 if [ -d /docker_ws/src ]; then
     cd /docker_ws

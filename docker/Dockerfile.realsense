@@ -1,9 +1,4 @@
-FROM ros2-apparatus-base:jazzy AS realsense
-LABEL maintainer="Duarte Cruz <duarte.cruz@isr.uc.pt>"
-SHELL ["/bin/bash","-c"]
-ARG ROS_DISTRO=jazzy
-ENV ROS_DISTRO=$ROS_DISTRO
-ENV DEBIAN_FRONTEND=noninteractive
+FROM ros:jazzy-ros-base
 
 # Install dependencies
 RUN apt-get update && \
@@ -20,19 +15,18 @@ RUN apt-get update && \
     libglu1-mesa-dev \
     libglfw3-dev \
     libusb-1.0-0-dev \
-    ros-${ROS_DISTRO}-cv-bridge \
-    ros-${ROS_DISTRO}-image-transport \
-    ros-${ROS_DISTRO}-diagnostic-updater \
-    ros-${ROS_DISTRO}-sensor-msgs \
-    ros-${ROS_DISTRO}-std-srvs && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    ros-jazzy-cv-bridge \
+    ros-jazzy-image-transport \
+    ros-jazzy-diagnostic-updater \
+    ros-jazzy-sensor-msgs \
+    ros-jazzy-std-srvs
 
 # Clone and build librealsense with DKMS
-WORKDIR /
+WORKDIR /tmp/
 RUN git clone https://github.com/IntelRealSense/librealsense.git
 
-WORKDIR /librealsense/build
+WORKDIR /tmp/librealsense/build
+RUN mkdir -p /tmp/librealsense/build
 RUN cmake .. -DFORCE_RSUSB_BACKEND=true -DCMAKE_BUILD_TYPE=Release && \
     make -j$(nproc) && \
     make install && \
@@ -41,8 +35,6 @@ RUN cmake .. -DFORCE_RSUSB_BACKEND=true -DCMAKE_BUILD_TYPE=Release && \
 # Set up workspace
 WORKDIR /docker_ws/src/
     
-RUN apt update --fix-missing
-
 # Clone realsense ROS package
 RUN git clone https://github.com/IntelRealSense/realsense-ros.git
 
@@ -51,14 +43,18 @@ COPY ./docker_build/rslaunch rslaunch
 
 # Install ROS dependencies using rosdep
 WORKDIR /docker_ws/
-RUN . /opt/ros/$ROS_DISTRO/setup.sh && \
+RUN . /opt/ros/jazzy/setup.sh && \
     rosdep update && \
     rosdep install --from-paths src -y --ignore-src \
     --skip-keys "librealsense2"
 
 # Build the workspace
-RUN . /opt/ros/$ROS_DISTRO/setup.sh && \
+RUN . /opt/ros/jazzy/setup.sh && \
     colcon build --symlink-install
+
+COPY ./docker_build/entrypoint.sh /entrypoint.sh
+
+RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["bash"]

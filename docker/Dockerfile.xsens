@@ -1,22 +1,32 @@
 # XSENS IMU
-FROM ros2-apparatus-base:jazzy AS xsens
+FROM ros:jazzy-ros-base
+
+RUN apt update && apt install -y --no-install-recommends \
+    build-essential \
+    git \
+    python3-colcon-common-extensions \
+    python3-pip \
+    python3-rosdep \
+    python3-rosinstall-generator \
+    python3-vcstool \
+    wget \
+    unzip
 
 WORKDIR /docker_ws/src/
 
-RUN apt update --fix-missing
-
-RUN git clone -b $ROS_DISTRO https://github.com/norlab-ulaval/norlab_xsens_driver.git && rosdep install --from-paths . --ignore-src  -r -y 
+RUN git clone -b jazzy https://github.com/norlab-ulaval/norlab_xsens_driver.git && rosdep install --from-paths . --ignore-src  -r -y 
 
 #Hotfix patch to a pressure error (force casting as a float) -- Only needed ROS2 Jazzy branch
-RUN if [ "$ROS_DISTRO" = "jazzy" ]; then \
-      sed -i "s/o\['Pressure'\]/float(o\['Pressure'\])/g" /docker_ws/src/norlab_xsens_driver/xsens_driver/mtnode.py; \
-    fi
-#RUN sed -i "s/o\['Pressure'\]/float(o\['Pressure'\])/g" /docker_ws/src/norlab_xsens_driver/xsens_driver/mtnode.py
+RUN sed -i "s/o\['Pressure'\]/float(o\['Pressure'\])/g" /docker_ws/src/norlab_xsens_driver/xsens_driver/mtnode.py
 
 WORKDIR /docker_ws
 
 # BUILD DRIVER
-RUN . /opt/ros/$ROS_DISTRO/setup.sh && colcon build --packages-up-to xsens_driver
+RUN . /opt/ros/jazzy/setup.sh && colcon build --packages-up-to xsens_driver
+
+COPY ./docker_build/entrypoint.sh /entrypoint.sh
+
+RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 CMD [ "ros2", "launch", "xsens_driver", "xsens_driver.launch.xml"]

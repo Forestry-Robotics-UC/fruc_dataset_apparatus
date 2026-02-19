@@ -1,0 +1,64 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 100
+    use_sim_time: False
+
+    diff_drive_controller:
+      type: diff_drive_controller/DiffDriveController
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+joint_state_broadcaster:
+  ros__parameters:
+    use_sim_time: False
+
+diff_drive_controller:
+  ros__parameters:
+    use_sim_time: False
+
+    left_wheel_names: ["front_left_motor", "back_left_motor"]
+    right_wheel_names: ["front_right_motor", "back_right_motor"]
+
+    wheel_separation: 0.44
+    wheels_per_side: 1  # actually 2, but both are controlled by 1 signal
+    wheel_radius: 0.13
+
+    wheel_separation_multiplier: 1.0
+    right_wheel_radius_multiplier: 1.0
+    left_wheel_radius_multiplier: 1.0
+
+    publish_rate: 50.0
+    odom_frame_id: odom
+    base_frame_id: base_link
+
+    open_loop: false
+    enable_odom_tf: false
+
+    cmd_vel_timeout: 0.25
+    #publish_limited_velocity: true
+    use_stamped_vel: false
+    #velocity_rolling_window_size: 10
+
+    # Preserve turning radius when limiting speed/acceleration/jerk
+    preserve_turning_radius: true
+
+    # Publish limited velocity
+    publish_cmd: true
+
+    # Publish wheel data
+    publish_wheel_data: true
+
+    linear.x.has_velocity_limits: true
+    linear.x.min_velocity: -1.5
+    linear.x.max_velocity: 1.5
+    linear.x.has_acceleration_limits: true
+    linear.x.min_acceleration: -2.5
+    linear.x.max_acceleration: 2.5
+
+    angular.z.has_velocity_limits: true
+    angular.z.min_velocity: -12.0
+    angular.z.max_velocity: 12.0
+    angular.z.has_acceleration_limits: true
+    angular.z.min_acceleration: -15.0
+    angular.z.max_acceleration: 15.0
