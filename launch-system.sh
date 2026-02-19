@@ -20,8 +20,8 @@ fi
 
 #SELECT TOPICS FOR RECORDING
 topics=$(kdialog --checklist "Topics to record" \
-    /imu/data "Xsens IMU" on \
-    /imu/mag "Xsens IMU" on \
+    /imu/data "Xsens IMU Data" on \
+    /imu/mag "Xsens IMU Magnetometer" on \
     /heading "Heading" on \
     /tf_static "Static TF" on \
     /tf "TF" on \
