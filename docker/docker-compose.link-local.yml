@@ -1,0 +1,7 @@
+version: '3.9'
+
+services:
+  ouster:
+    networks:
+      - ros2-net
+      - link-local-net

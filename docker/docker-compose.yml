@@ -60,7 +60,6 @@ services:
       - 7503:7503/udp
     networks:
       - ros2-net
-      - link-local-net
     volumes:
       - ./docker_shared:/shared
     command:

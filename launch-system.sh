@@ -103,7 +103,7 @@ if [ $? -eq 0 ]; then
     #Launch the compose files
     cd "$SCRIPT_DIR/docker"
 
-    (sleep 8 && podman-compose up -d publisher ouster realsense xsens emlid > /dev/null 2>&1) &
+    (sleep 8 && podman-compose -f docker-compose.yml up -d publisher ouster realsense xsens emlid > /dev/null 2>&1) &
 
     cmd1="ros2 run hector_recorder record $bag_limit_flag --topics $topics -o /rosbags/$recording_name"
     cmd2="ros2 bag info /rosbags/$recording_name > /rosbags/$recording_name/info.txt"

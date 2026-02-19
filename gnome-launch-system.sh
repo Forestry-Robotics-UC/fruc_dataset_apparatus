@@ -20,8 +20,8 @@ fi
 
 #SELECT TOPICS FOR RECORDING
 topics=$(zenity --list --checklist --title="Select Topics" --text="Topics to record" --column="Select" --column="Topic" --column="Description" \
-    TRUE "/imu/data" "Xsens IMU" \
-    TRUE "/imu/mag" "Xsens IMU" \
+    TRUE "/imu/data" "Xsens IMU Data" \
+    TRUE "/imu/mag" "Xsens IMU Magnetometer" \
     TRUE "/heading" "Heading" \
     TRUE "/tf_static" "Static TF" \
     TRUE "/tf" "TF" \
