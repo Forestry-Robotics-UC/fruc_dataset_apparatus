@@ -34,17 +34,17 @@ topics=$(zenity --list --checklist --title="Select Topics" --text="Topics to rec
     FALSE "/ouster/nearir_image" "Ouster NearIR Image" \
     FALSE "/ouster/range_image" "Ouster Range Image" \
     FALSE "/ouster/reflec_image" "Ouster Reflectivity Image" \
-    TRUE "/camera/camera/color/image_raw" "Realsense Color" \
-    TRUE "/camera/camera/color/camera_info" "Realsense Color Camera Info" \
-    TRUE "/camera/camera/aligned_depth_to_color/camera_info" "Realsense Aligned Depth to Color" \
-    TRUE "/camera/camera/aligned_depth_to_color/image_raw" "Realsense Align Depth" \
-    FALSE "/camera/camera/depth/image_rect_raw" "Realsense Depth" \
-    TRUE "/camera/camera/color/metadata" "Realsense Color Metadata" \
-    TRUE "/camera/camera/depth/metadata" "Realsense Depth Metadata" \
-    TRUE "/camera/camera/extrinsics/depth_to_color" "Realsense Extrinsics Depth to Color" \
-    TRUE "/camera/camera/extrinsics/depth_to_depth" "Realsense Extrinsics Depth to Depth" \
-    FALSE "/camera/camera/left/image_raw" "Realsense IR Left" \
-    FALSE "/camera/camera/right/image_raw" "Realsense IR Right" \
+    TRUE "/camera/color/image_raw" "Realsense Color" \
+    TRUE "/camera/color/camera_info" "Realsense Color Camera Info" \
+    TRUE "/camera/aligned_depth_to_color/camera_info" "Realsense Aligned Depth to Color" \
+    TRUE "/camera/aligned_depth_to_color/image_raw" "Realsense Align Depth" \
+    FALSE "/camera/depth/image_rect_raw" "Realsense Depth" \
+    TRUE "/camera/color/metadata" "Realsense Color Metadata" \
+    TRUE "/camera/depth/metadata" "Realsense Depth Metadata" \
+    TRUE "/camera/extrinsics/depth_to_color" "Realsense Extrinsics Depth to Color" \
+    TRUE "/camera/extrinsics/depth_to_depth" "Realsense Extrinsics Depth to Depth" \
+    FALSE "/camera/left/image_raw" "Realsense IR Left" \
+    FALSE "/camera/right/image_raw" "Realsense IR Right" \
     TRUE "/fix" "GPS" \
     --separator=" " --width=700 --height=600)
 

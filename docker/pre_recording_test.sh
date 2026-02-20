@@ -14,10 +14,10 @@ topics="/imu/data \
 /ouster/lidar_packets \
 /ouster/imu_packets \
 /ouster/metadata \
-/camera/camera/color/image_raw \
-/camera/camera/color/camera_info \
-/camera/camera/aligned_depth_to_color/image_raw \
-/camera/camera/depth/metadata \
+/camera/color/image_raw \
+/camera/color/camera_info \
+/camera/aligned_depth_to_color/image_raw \
+/camera/depth/metadata \
 /fix"
 
 # Split bags every 60 seconds
