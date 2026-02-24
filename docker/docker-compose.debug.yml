@@ -1,0 +1,50 @@
+ 
+version: "3.9"
+
+services:
+  debug-bridge:
+    build:
+      context: .
+      dockerfile: Dockerfile.debug
+    image: ros2-apparatus-debug:jazzy
+    container_name: ros2-apparatus-debug-bridge
+    stdin_open: true
+    tty: true
+    privileged: true
+    networks:
+      - ros2-net
+    volumes:
+      - ./docker_shared:/shared
+      - /dev:/dev
+      - /run/udev:/run/udev:ro
+      - /sys:/sys:ro
+      - /proc:/proc:ro
+    environment:
+      - ROS_DOMAIN_ID=0
+      # optionally pin the same RMW everywhere:
+      # - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+
+  debug-host:
+    build:
+      context: .
+      dockerfile: Dockerfile.debug
+    image: ros2-apparatus-debug:jazzy
+    container_name: ros2-apparatus-debug-host
+    stdin_open: true
+    tty: true
+    privileged: true
+    network_mode: host
+    volumes:
+      - ./docker_shared:/shared
+      - /dev:/dev
+      - /run/udev:/run/udev:ro
+      - /sys:/sys:ro
+      - /proc:/proc:ro
+    environment:
+      - ROS_DOMAIN_ID=0
+      # - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+
+networks:
+  ros2-net:
+    external: true
+    name: docker_ros2-net

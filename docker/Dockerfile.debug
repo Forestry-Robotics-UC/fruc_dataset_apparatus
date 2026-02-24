@@ -1,0 +1,30 @@
+# docker/Dockerfile.debug
+FROM ros2-apparatus-recording:jazzy
+
+SHELL ["/bin/bash", "-lc"]
+
+# Core debug tools for ROS2 timing/transport/hardware
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    iproute2 iputils-ping net-tools \
+    ethtool tcpdump tshark \
+    chrony linuxptp \
+    usbutils udev v4l-utils \
+    htop procps lsof strace \
+    jq curl \
+    python3-pip \
+ && rm -rf /var/lib/apt/lists/*
+
+# Optional: ROS diagnostics utilities (lightweight)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-jazzy-rqt-graph \
+    ros-jazzy-rqt-topic \
+    ros-jazzy-rqt-console \
+    ros-jazzy-tf2-tools \
+ && rm -rf /var/lib/apt/lists/*
+
+# Convenience: ensure ROS env is available in interactive shells
+RUN echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc && \
+    echo "if [ -f /docker_ws/install/setup.bash ]; then source /docker_ws/install/setup.bash; fi" >> /root/.bashrc
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["bash"]

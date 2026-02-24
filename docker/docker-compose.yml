@@ -24,8 +24,7 @@ services:
     command:
       - ros2
       - launch
-      - rslaunch
-      - rs_launch.py
+      - /shared/scripts/rs_launch.py
       - use_sim_time:=False
 
   xsens:
