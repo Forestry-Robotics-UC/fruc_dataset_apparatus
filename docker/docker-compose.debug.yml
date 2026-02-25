@@ -74,6 +74,8 @@ services:
       - observability
     volumes:
       - ./docker_shared:/shared
+    environment:
+      - TOPIC_MONITOR_AUTOSTART=${TOPIC_MONITOR_AUTOSTART:-1}
     command:
       - /shared/scripts/diagnostics/topic_monitor_runner.sh
 
@@ -116,6 +118,8 @@ services:
       - profiling
     volumes:
       - ./docker_shared:/shared
+    environment:
+      - TRACE_AUTOSTART=${TRACE_AUTOSTART:-0}
     command:
       - /shared/scripts/diagnostics/ros2_tracing_runner.sh
 

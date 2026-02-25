@@ -4,4 +4,4 @@
     diagnostics_period: 1.0
     rgb_camera.global_time_enabled: true
     depth_module.global_time_enabled: true
-    depth_module.depth_profile: 640,480,30
+    depth_module.depth_profile: 1280,720,30
