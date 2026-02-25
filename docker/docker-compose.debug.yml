@@ -17,9 +17,8 @@ services:
       - /sys:/sys:ro
       - /proc:/proc:ro
     environment:
-      - ROS_DOMAIN_ID=0
-      # optionally pin the same RMW everywhere:
-      # - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-0}
+      - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
 
   debug-host:
     build:
@@ -38,8 +37,8 @@ services:
       - /sys:/sys:ro
       - /proc:/proc:ro
     environment:
-      - ROS_DOMAIN_ID=0
-      # - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-0}
+      - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
 
   diagnostic-common:
     build:
@@ -56,6 +55,9 @@ services:
       - observability
     volumes:
       - ./docker_shared:/shared
+    environment:
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-0}
+      - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
     command:
       - /shared/scripts/diagnostics/diagnostic_common_runner.sh
 
@@ -75,7 +77,11 @@ services:
     volumes:
       - ./docker_shared:/shared
     environment:
-      - TOPIC_MONITOR_AUTOSTART=${TOPIC_MONITOR_AUTOSTART:-1}
+      - TOPIC_MONITOR_AUTOSTART=${TOPIC_MONITOR_AUTOSTART:-0}
+      - TOPIC_MONITOR_TOPIC=${TOPIC_MONITOR_TOPIC:-/diagnostics_agg}
+      - TOPIC_MONITOR_TOPICS=${TOPIC_MONITOR_TOPICS:-/diagnostics_agg,/diagnostics}
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-0}
+      - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
     command:
       - /shared/scripts/diagnostics/topic_monitor_runner.sh
 
@@ -94,6 +100,9 @@ services:
       - observability
     volumes:
       - ./docker_shared:/shared
+    environment:
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-0}
+      - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
     command:
       - ros2
       - run
@@ -120,10 +129,12 @@ services:
       - ./docker_shared:/shared
     environment:
       - TRACE_AUTOSTART=${TRACE_AUTOSTART:-0}
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-0}
+      - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
     command:
       - /shared/scripts/diagnostics/ros2_tracing_runner.sh
 
 networks:
   ros2-net:
-    external: true
-    name: docker_ros2-net
+    driver: bridge
+    name: ${ROS2_NETWORK_NAME:-ros2_net}

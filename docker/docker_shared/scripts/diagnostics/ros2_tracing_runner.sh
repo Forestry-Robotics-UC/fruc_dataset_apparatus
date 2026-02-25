@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Avoid nounset failures in ROS setup scripts on some Jazzy images.
+export AMENT_TRACE_SETUP_FILES="${AMENT_TRACE_SETUP_FILES-}"
+set +u
 source /opt/ros/jazzy/setup.bash
+set -u
 
 TRACE_ROOT="${TRACE_ROOT:-/shared/traces}"
 TRACE_SESSION_NAME="${TRACE_SESSION_NAME:-trace_$(date -u +%Y%m%dT%H%M%SZ)}"

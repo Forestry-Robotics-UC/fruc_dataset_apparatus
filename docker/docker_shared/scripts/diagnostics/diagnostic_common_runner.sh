@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Avoid nounset failures in ROS setup scripts on some Jazzy images.
+export AMENT_TRACE_SETUP_FILES="${AMENT_TRACE_SETUP_FILES-}"
+set +u
 source /opt/ros/jazzy/setup.bash
+set -u
 
 if [[ "${DIAG_COMMON_AUTOSTART:-0}" != "1" ]]; then
     echo "diagnostic-common is idle by default (low-overhead mode)."

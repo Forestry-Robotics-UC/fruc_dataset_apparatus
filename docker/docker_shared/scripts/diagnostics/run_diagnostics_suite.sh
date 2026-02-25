@@ -11,11 +11,17 @@ OUT_DIR="${OUTPUT_ROOT}/${RUN_ID}"
 mkdir -p "${OUT_DIR}"
 
 # FRUC Steam Deck preset (this diagnostics flow is scoped to fruc_dataset_apparatus).
-DIAG_SAMPLE_SEC="${DIAG_SAMPLE_SEC:-6}"
+DIAG_SAMPLE_SEC="${DIAG_SAMPLE_SEC:-10}"
 DIAG_ENABLE_BW="${DIAG_ENABLE_BW:-0}"
 DIAG_ENABLE_MULTICAST="${DIAG_ENABLE_MULTICAST:-0}"
 DIAG_COMPOSE_FILES="${DIAG_COMPOSE_FILES:-docker-compose.yml,docker-compose.debug.yml}"
 DIAG_COMPOSE_IMPL="${DIAG_COMPOSE_IMPL:-podman}"
+DIAG_EXPECTED_ROS_NETWORK="${DIAG_EXPECTED_ROS_NETWORK:-${ROS2_NETWORK_NAME:-docker_ros2-net}}"
+DIAG_ACCEPTED_ROS_NETWORKS="${DIAG_ACCEPTED_ROS_NETWORKS:-${DIAG_EXPECTED_ROS_NETWORK},ros2_net,docker_ros2-net}"
+DIAG_EXPECTED_ROS_DOMAIN_ID="${DIAG_EXPECTED_ROS_DOMAIN_ID:-0}"
+DIAG_EXPECTED_RMW_IMPLEMENTATION="${DIAG_EXPECTED_RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}"
+DIAG_ENFORCE_GRAPH_CONSISTENCY="${DIAG_ENFORCE_GRAPH_CONSISTENCY:-1}"
+DIAG_ENFORCE_USE_SIM_TIME_FALSE="${DIAG_ENFORCE_USE_SIM_TIME_FALSE:-1}"
 DIAG_USE_OUSTER_POINTS="${DIAG_USE_OUSTER_POINTS:-1}"
 DIAG_OUSTER_POINTS_TOPIC="${DIAG_OUSTER_POINTS_TOPIC:-/ouster/points}"
 DIAG_RECORDING_QOS_OVERRIDES="${DIAG_RECORDING_QOS_OVERRIDES:-${REPO_ROOT}/docker/docker_shared/scripts/diagnostics/recording_qos_overrides.yaml}"
@@ -30,6 +36,8 @@ DIAG_HARDWARE_PROBE_SERVICE="${DIAG_HARDWARE_PROBE_SERVICE:-debug-host}"
 DIAG_WINDOW_PROBE_IN_CONTAINER="${DIAG_WINDOW_PROBE_IN_CONTAINER:-/shared/scripts/diagnostics/window_topic_probe.py}"
 DIAG_WINDOW_PROBE_HOST="${DIAG_WINDOW_PROBE_HOST:-${REPO_ROOT}/docker/docker_shared/scripts/diagnostics/window_topic_probe.py}"
 DIAG_CPU_SAMPLE_INTERVAL_SEC="${DIAG_CPU_SAMPLE_INTERVAL_SEC:-1}"
+DIAG_EXEC_RETRIES="${DIAG_EXEC_RETRIES:-1}"
+DIAG_EXEC_RETRY_SLEEP_SEC="${DIAG_EXEC_RETRY_SLEEP_SEC:-2}"
 
 PRIMARY_SERVICES=(
   realsense
@@ -76,10 +84,12 @@ XSENS_OPTIONAL_TOPICS=(
 
 COMPOSE_CMD=()
 COMPOSE_FILE_ARGS=()
+COMPOSE_ENGINE=""
 RUNTIME_SENSOR_TOPICS=()
 RUNTIME_STAMPED_TOPICS=()
 RUNTIME_OUSTER_POINTS_TOPIC=""
 RUNTIME_CHECK_TOPICS=()
+
 RUNTIME_RECORD_TOPICS=()
 RUNTIME_CAMERA_IMAGE_TOPICS=()
 RUNTIME_CAMERA_METADATA_TOPICS=()
@@ -94,6 +104,87 @@ log() {
 
 warn() {
   printf '[%s] WARNING: %s\n' "$(date -u +%H:%M:%S)" "$*" >&2
+}
+
+ros_setup_prelude() {
+  cat <<'EOF'
+export AMENT_TRACE_SETUP_FILES="${AMENT_TRACE_SETUP_FILES-}"
+set +u
+if [[ -f /opt/ros/jazzy/setup.bash ]]; then
+  source /opt/ros/jazzy/setup.bash
+fi
+if [[ -f /docker_ws/install/setup.bash ]]; then
+  source /docker_ws/install/setup.bash
+elif [[ -f install/setup.bash ]]; then
+  source install/setup.bash
+fi
+set -u
+EOF
+}
+
+compose_exec_bash() {
+  local service="$1"
+  local command_body="$2"
+  local script
+  if ! ensure_service_exec_ready "${service}" "compose_exec"; then
+    return 1
+  fi
+  script="$(printf '%s\n%s\n' "$(ros_setup_prelude)" "${command_body}")"
+  "${COMPOSE_CMD[@]}" exec -T "${service}" bash -lc "${script}"
+}
+
+compose_exec_with_setup() {
+  local service="$1"
+  shift
+  local command_line
+  printf -v command_line '%q ' "$@"
+  compose_exec_bash "${service}" "${command_line}"
+}
+
+capture_service_exec_failure_context() {
+  local service="$1"
+  local stage="$2"
+  local container_name
+  local out_file="${OUT_DIR}/task0_service_exec_failure_${service}_${stage}.log"
+
+  container_name="$(service_container_name "${service}")"
+  {
+    echo "service=${service}"
+    echo "stage=${stage}"
+    echo "utc_iso=$(date -u +%Y-%m-%dT%H:%M:%S.%N%z)"
+    echo "compose_command=${COMPOSE_CMD[*]}"
+    echo "container_name=${container_name:-unknown}"
+    echo
+    echo "# compose ps"
+    "${COMPOSE_CMD[@]}" ps || true
+    echo
+    echo "# service logs"
+    "${COMPOSE_CMD[@]}" logs --no-color --tail=200 "${service}" || true
+  } > "${out_file}" 2>&1 || true
+}
+
+ensure_service_exec_ready() {
+  local service="$1"
+  local stage="$2"
+  local attempt=0
+
+  while true; do
+    if service_running "${service}"; then
+      return 0
+    fi
+
+    if [[ "${attempt}" -lt "${DIAG_EXEC_RETRIES}" ]]; then
+      attempt=$((attempt + 1))
+      log "Service '${service}' not running at ${stage}; retry up -d (${attempt}/${DIAG_EXEC_RETRIES})"
+      "${COMPOSE_CMD[@]}" up -d "${service}" >/dev/null 2>&1 || true
+      sleep "${DIAG_EXEC_RETRY_SLEEP_SEC}"
+      continue
+    fi
+
+    warn "Service '${service}' is not running at ${stage}; capture context in task0_service_exec_failure_${service}_${stage}.log."
+    capture_service_exec_failure_context "${service}" "${stage}"
+    return 1
+  done
 }
 
 csv_to_topics() {
@@ -133,7 +224,7 @@ detect_lidar_nic() {
     return 0
   fi
 
-  nic="$("${COMPOSE_CMD[@]}" exec -T "${hw_service}" bash -lc "
+  nic="$(compose_exec_bash "${hw_service}" "
 set -e
 ip route get ${sensor_host} 2>/dev/null | awk '{for (i = 1; i <= NF; ++i) if (\$i == \"dev\") {print \$(i + 1); exit}}'
 " 2>/dev/null | tr -d '\r' || true)"
@@ -146,7 +237,7 @@ capture_hardware_snapshot() {
   local lidar_nic="$3"
   local out_file="${OUT_DIR}/task4_hw_${phase}.log"
 
-  "${COMPOSE_CMD[@]}" exec -T "${hw_service}" bash -lc "
+  compose_exec_bash "${hw_service}" "
 set -e
 echo \"phase=${phase}\"
 echo \"service=${hw_service}\"
@@ -191,6 +282,7 @@ detect_compose() {
     docker)
       if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
         COMPOSE_CMD=(docker compose "${COMPOSE_FILE_ARGS[@]}")
+        COMPOSE_ENGINE="docker"
         return
       fi
       echo "DIAG_COMPOSE_IMPL=docker but docker compose is unavailable." >&2
@@ -199,6 +291,7 @@ detect_compose() {
     podman)
       if command -v podman-compose >/dev/null 2>&1; then
         COMPOSE_CMD=(podman-compose "${COMPOSE_FILE_ARGS[@]}")
+        COMPOSE_ENGINE="podman"
         return
       fi
       echo "DIAG_COMPOSE_IMPL=podman but podman-compose is unavailable." >&2
@@ -207,10 +300,12 @@ detect_compose() {
     auto)
       if command -v podman-compose >/dev/null 2>&1; then
         COMPOSE_CMD=(podman-compose "${COMPOSE_FILE_ARGS[@]}")
+        COMPOSE_ENGINE="podman"
         return
       fi
       if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
         COMPOSE_CMD=(docker compose "${COMPOSE_FILE_ARGS[@]}")
+        COMPOSE_ENGINE="docker"
         return
       fi
       echo "Could not find docker compose or podman-compose." >&2
@@ -223,11 +318,350 @@ detect_compose() {
   esac
 }
 
+service_container_name() {
+  local service="$1"
+  case "${service}" in
+    realsense) echo "ros2-apparatus-realsense" ;;
+    xsens) echo "ros2-apparatus-xsens" ;;
+    ouster) echo "ros2-apparatus-ouster" ;;
+    emlid) echo "ros2-apparatus-emlid" ;;
+    publisher) echo "ros2-apparatus-publisher" ;;
+    recording) echo "ros2-apparatus-recording" ;;
+    debug-bridge) echo "ros2-apparatus-debug-bridge" ;;
+    debug-host) echo "ros2-apparatus-debug-host" ;;
+    diagnostic-common) echo "ros2-apparatus-diagnostic-common" ;;
+    topic-monitor) echo "ros2-apparatus-topic-monitor" ;;
+    diagnostic-aggregator) echo "ros2-apparatus-diagnostic-aggregator" ;;
+    ros2-tracing) echo "ros2-apparatus-ros2-tracing" ;;
+    *) ;;
+  esac
+}
+
+container_running() {
+  local container_name="$1"
+  local running_state=""
+
+  if [[ -z "${container_name}" ]]; then
+    return 1
+  fi
+
+  case "${COMPOSE_ENGINE}" in
+    podman)
+      if ! command -v podman >/dev/null 2>&1; then
+        return 1
+      fi
+      running_state="$(podman inspect -f '{{.State.Running}}' "${container_name}" 2>/dev/null || true)"
+      ;;
+    docker)
+      if ! command -v docker >/dev/null 2>&1; then
+        return 1
+      fi
+      running_state="$(docker inspect -f '{{.State.Running}}' "${container_name}" 2>/dev/null || true)"
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+
+  [[ "${running_state}" == "true" ]]
+}
+
+container_networks() {
+  local container_name="$1"
+  local networks=""
+
+  if [[ -z "${container_name}" ]]; then
+    return 0
+  fi
+
+  case "${COMPOSE_ENGINE}" in
+    podman)
+      networks="$(podman inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{printf "%s " $k}}{{end}}' "${container_name}" 2>/dev/null || true)"
+      ;;
+    docker)
+      networks="$(docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{printf "%s " $k}}{{end}}' "${container_name}" 2>/dev/null || true)"
+      ;;
+  esac
+
+  echo "${networks}" | xargs
+}
+
+detect_runtime_ros_network() {
+  local -a candidates=(
+    debug-bridge
+    realsense
+    ouster
+    emlid
+    publisher
+    recording
+    diagnostic-common
+    diagnostic-aggregator
+    ros2-tracing
+    xsens
+  )
+  local service
+  local container_name
+  local networks
+  local net
+
+  for service in "${candidates[@]}"; do
+    container_name="$(service_container_name "${service}")"
+    [[ -z "${container_name}" ]] && continue
+    networks="$(container_networks "${container_name}")"
+    for net in ${networks}; do
+      case "${net}" in
+        *ros2*|*docker_ros2-net*|*ros2-net*)
+          echo "${net}"
+          return 0
+          ;;
+      esac
+    done
+  done
+  return 1
+}
+
 service_running() {
   local service="$1"
+  local container_name
   local cid
-  cid="$("${COMPOSE_CMD[@]}" ps -q "${service}" 2>/dev/null || true)"
-  [[ -n "${cid}" ]]
+  local running_state=""
+
+  container_name="$(service_container_name "${service}")"
+  if container_running "${container_name}"; then
+    return 0
+  fi
+
+  cid="$("${COMPOSE_CMD[@]}" ps -q "${service}" 2>/dev/null | head -n1 || true)"
+  if [[ -n "${cid}" ]]; then
+    case "${COMPOSE_ENGINE}" in
+      podman)
+        running_state="$(podman inspect -f '{{.State.Running}}' "${cid}" 2>/dev/null || true)"
+        ;;
+      docker)
+        running_state="$(docker inspect -f '{{.State.Running}}' "${cid}" 2>/dev/null || true)"
+        ;;
+      *)
+        running_state=""
+        ;;
+    esac
+    if [[ "${running_state}" == "true" ]]; then
+      return 0
+    fi
+  fi
+
+  # podman-compose may return empty for `ps -q`; fallback to parsing `ps <service>`.
+  if "${COMPOSE_CMD[@]}" ps "${service}" 2>/dev/null | awk '
+NR==1 {next}
+NF==0 {next}
+/Exit|Exited|Created/ {next}
+{found=1}
+END {exit(found ? 0 : 1)}
+'; then
+    return 0
+  fi
+
+  return 1
+}
+
+check_ros_graph_consistency() {
+  local out_file="${OUT_DIR}/task0_ros_graph_consistency.log"
+  local expected_network="${ROS2_NETWORK_NAME:-${DIAG_EXPECTED_ROS_NETWORK}}"
+  local accepted_networks_csv="${DIAG_ACCEPTED_ROS_NETWORKS}"
+  local accepted_networks
+  local expected_domain="${DIAG_EXPECTED_ROS_DOMAIN_ID}"
+  local expected_rmw="${DIAG_EXPECTED_RMW_IMPLEMENTATION}"
+  local -a check_services=(
+    debug-bridge
+    realsense
+    xsens
+    ouster
+    emlid
+    recording
+    publisher
+    diagnostic-common
+    diagnostic-aggregator
+    ros2-tracing
+  )
+  local -a domain_values=()
+  local -a rmw_values=()
+  local service
+  local container_name
+  local networks
+  local domain
+  local rmw
+  local domain_raw
+  local rmw_raw
+  local network_match=0
+  local candidate_network
+  local mismatch=0
+  local unique_domains
+  local unique_rmws
+
+  {
+    echo "expected_network=${expected_network}"
+    echo "accepted_networks=${accepted_networks_csv}"
+    echo "expected_ros_domain_id=${expected_domain}"
+    echo "expected_rmw_implementation=${expected_rmw}"
+    accepted_networks="$(tr ',' ' ' <<< "${accepted_networks_csv}")"
+    if [[ -n "${expected_network}" ]] && ! grep -qw "${expected_network}" <<< "${accepted_networks}"; then
+      accepted_networks="${accepted_networks} ${expected_network}"
+    fi
+    for service in "${check_services[@]}"; do
+      if ! service_running "${service}"; then
+        echo "service=${service} status=not_running"
+        continue
+      fi
+      container_name="$(service_container_name "${service}")"
+      networks="$(container_networks "${container_name}")"
+      domain_raw="$(compose_exec_bash "${service}" 'echo ${ROS_DOMAIN_ID:-unset}' 2>/dev/null | tr -d '\r' | tail -n1 || true)"
+      rmw_raw="$(compose_exec_bash "${service}" 'echo ${RMW_IMPLEMENTATION:-unset}' 2>/dev/null | tr -d '\r' | tail -n1 || true)"
+      domain_raw="${domain_raw:-unset}"
+      rmw_raw="${rmw_raw:-unset}"
+      domain="${domain_raw}"
+      rmw="${rmw_raw}"
+      if [[ "${domain}" == "unset" || -z "${domain}" ]]; then
+        domain="${expected_domain:-0}"
+      fi
+      if [[ "${rmw}" == "unset" || -z "${rmw}" ]]; then
+        rmw="${expected_rmw:-rmw_fastrtps_cpp}"
+      fi
+      domain_values+=("${domain}")
+      rmw_values+=("${rmw}")
+      echo "service=${service} container=${container_name:-unknown} networks=${networks:-none} ros_domain_id_raw=${domain_raw} rmw_raw=${rmw_raw} ros_domain_id=${domain} rmw=${rmw}"
+
+      network_match=0
+      if [[ "${service}" != "debug-host" && -n "${accepted_networks}" ]]; then
+        for candidate_network in ${accepted_networks}; do
+          if grep -qw "${candidate_network}" <<< "${networks}"; then
+            network_match=1
+            break
+          fi
+        done
+        if [[ "${network_match}" -ne 1 ]]; then
+          echo "network_mismatch=${service} expected_any=${accepted_networks} got=${networks:-none}"
+          mismatch=1
+        fi
+      fi
+      if [[ -n "${expected_domain}" && "${domain}" != "${expected_domain}" ]]; then
+        echo "ros_domain_mismatch=${service} expected=${expected_domain} got=${domain}"
+        mismatch=1
+      fi
+      if [[ -n "${expected_rmw}" && "${rmw}" != "${expected_rmw}" ]]; then
+        echo "rmw_mismatch=${service} expected=${expected_rmw} got=${rmw}"
+        mismatch=1
+      fi
+    done
+
+    unique_domains="$(printf '%s\n' "${domain_values[@]}" | sed '/^$/d' | sort -u | tr '\n' ' ' | sed 's/[[:space:]]*$//')"
+    unique_rmws="$(printf '%s\n' "${rmw_values[@]}" | sed '/^$/d' | sort -u | tr '\n' ' ' | sed 's/[[:space:]]*$//')"
+    echo "unique_ros_domain_ids=${unique_domains:-none}"
+    echo "unique_rmw_implementations=${unique_rmws:-none}"
+    if [[ "$(printf '%s\n' "${domain_values[@]}" | sed '/^$/d' | sort -u | wc -l | tr -d ' ')" -gt 1 ]]; then
+      echo "ros_domain_status=mismatch"
+      mismatch=1
+    else
+      echo "ros_domain_status=ok"
+    fi
+    if [[ "$(printf '%s\n' "${rmw_values[@]}" | sed '/^$/d' | sort -u | wc -l | tr -d ' ')" -gt 1 ]]; then
+      echo "rmw_status=mismatch"
+      mismatch=1
+    else
+      echo "rmw_status=ok"
+    fi
+    if [[ "${mismatch}" -eq 0 ]]; then
+      echo "graph_consistency=ok"
+    else
+      echo "graph_consistency=fail"
+    fi
+  } > "${out_file}" 2>&1 || true
+
+  [[ "${mismatch}" -eq 0 ]]
+}
+
+dump_service_detection() {
+  local service
+  local container_name
+  local running
+  local status_val
+  local out_file="${OUT_DIR}/task0_service_detection.log"
+
+  {
+    echo "compose_engine=${COMPOSE_ENGINE}"
+    echo "compose_cmd=${COMPOSE_CMD[*]}"
+    for service in "${PRIMARY_SERVICES[@]}"; do
+      container_name="$(service_container_name "${service}")"
+      running="no"
+      status_val="unknown"
+      if service_running "${service}"; then
+        running="yes"
+      fi
+      if [[ -n "${container_name}" ]]; then
+        case "${COMPOSE_ENGINE}" in
+          podman)
+            status_val="$(podman inspect -f '{{.State.Status}}' "${container_name}" 2>/dev/null || echo missing)"
+            ;;
+          docker)
+            status_val="$(docker inspect -f '{{.State.Status}}' "${container_name}" 2>/dev/null || echo missing)"
+            ;;
+        esac
+      fi
+      echo "service=${service} container=${container_name:-unknown} running=${running} state=${status_val}"
+    done
+  } > "${out_file}" 2>&1 || true
+}
+
+capture_ros_time_params() {
+  local probe_service="$1"
+  local out_file="$2"
+
+  compose_exec_bash "${probe_service}" "
+set -e
+echo \"probe_service=${probe_service}\"
+if ros2 topic list | grep -Fxq /clock; then
+  echo \"clock_topic=present\"
+else
+  echo \"clock_topic=absent\"
+fi
+
+echo \"nodes:\"
+ros2 node list || true
+
+echo \"node_use_sim_time:\"
+for node in \$(ros2 node list 2>/dev/null); do
+  value=\$(ros2 param get \"\$node\" use_sim_time 2>/dev/null | awk -F\": \" \"END {print \\\$2}\")
+  if [[ -z \"\$value\" ]]; then
+    value=\"unavailable\"
+  fi
+  echo \"\$node \$value\"
+done
+" > "${out_file}" 2>&1 || true
+}
+
+enforce_use_sim_time_false() {
+  local probe_service="$1"
+  local out_file="$2"
+
+  compose_exec_bash "${probe_service}" '
+set -e
+echo "enforce_use_sim_time_false=enabled"
+changed=0
+failed=0
+for node in $(ros2 node list 2>/dev/null); do
+  value=$(ros2 param get "$node" use_sim_time 2>/dev/null | awk -F": " "END {print $2}")
+  if [[ "$value" == "true" ]]; then
+    if ros2 param set "$node" use_sim_time false >/tmp/diag_use_sim_time_set.log 2>&1; then
+      echo "set_false_ok=${node}"
+      changed=1
+    else
+      echo "set_false_failed=${node}"
+      sed -n "1,3p" /tmp/diag_use_sim_time_set.log || true
+      failed=1
+    fi
+  fi
+done
+echo "changed=${changed}"
+echo "failed=${failed}"
+' > "${out_file}" 2>&1 || true
 }
 
 ensure_service_running() {
@@ -262,7 +696,6 @@ pick_probe_service() {
     xsens
     emlid
     recording
-    topic-monitor
     diagnostic-common
     diagnostic-aggregator
     ros2-tracing
@@ -300,7 +733,7 @@ detect_ouster_points_topic() {
   local candidate
   local candidates=()
 
-  topic_list="$("${COMPOSE_CMD[@]}" exec -T "${probe_service}" bash -lc 'ros2 topic list 2>/dev/null || true' 2>/dev/null || true)"
+  topic_list="$(compose_exec_bash "${probe_service}" 'ros2 topic list 2>/dev/null || true' 2>/dev/null || true)"
   [[ -z "${topic_list}" ]] && return 0
 
   if [[ -n "${DIAG_OUSTER_POINTS_TOPIC}" ]]; then
@@ -344,13 +777,30 @@ main() {
   detect_compose
   cd "${DOCKER_DIR}"
 
-  ensure_service_running topic-monitor || true
+  local resolved_ros_network="${ROS2_NETWORK_NAME:-${DIAG_EXPECTED_ROS_NETWORK}}"
+  local detected_ros_network
+  detected_ros_network="$(detect_runtime_ros_network || true)"
+  if [[ -n "${detected_ros_network}" ]]; then
+    resolved_ros_network="${detected_ros_network}"
+  fi
+
+  export ROS2_NETWORK_NAME="${resolved_ros_network}"
+  export ROS_DOMAIN_ID="${ROS_DOMAIN_ID:-${DIAG_EXPECTED_ROS_DOMAIN_ID}}"
+  export RMW_IMPLEMENTATION="${RMW_IMPLEMENTATION:-${DIAG_EXPECTED_RMW_IMPLEMENTATION}}"
+
   ensure_service_running ros2-tracing || true
+  ensure_service_running debug-bridge || true
 
   mapfile -t RUNNING_SERVICES < <(running_services)
+  dump_service_detection
   if [[ "${#RUNNING_SERVICES[@]}" -eq 0 ]]; then
-    echo "No target services are running. Start containers first, then rerun." >&2
-    exit 1
+    ensure_service_running debug-host || true
+    mapfile -t RUNNING_SERVICES < <(running_services)
+    dump_service_detection
+    if [[ "${#RUNNING_SERVICES[@]}" -eq 0 ]]; then
+      echo "No target services are running. Start sensor/debug containers first, then rerun." >&2
+      exit 1
+    fi
   fi
 
   local probe_service
@@ -359,6 +809,15 @@ main() {
     echo "Could not pick a probe service." >&2
     exit 1
   fi
+
+  if ! check_ros_graph_consistency; then
+    warn "ROS graph consistency checks failed; see ${OUT_DIR}/task0_ros_graph_consistency.log."
+    if [[ "${DIAG_ENFORCE_GRAPH_CONSISTENCY}" == "1" ]]; then
+      echo "ROS graph consistency check failed. Fix ROS_DOMAIN_ID/RMW/network alignment and rerun." >&2
+      exit 1
+    fi
+  fi
+
   build_runtime_topics "${probe_service}"
 
   mapfile -t RUNTIME_CAMERA_IMAGE_TOPICS < <(csv_to_topics "${DIAG_CAMERA_IMAGE_TOPICS}" | dedupe_topics)
@@ -407,7 +866,12 @@ main() {
 
   log "Diagnostics run id: ${RUN_ID}"
   log "Output folder: ${OUT_DIR}"
+  log "Service detection log: ${OUT_DIR}/task0_service_detection.log"
+  log "ROS graph consistency log: ${OUT_DIR}/task0_ros_graph_consistency.log"
   log "Using compose command: ${COMPOSE_CMD[*]}"
+  log "expected ROS network: ${ROS2_NETWORK_NAME}"
+  log "expected ROS_DOMAIN_ID: ${ROS_DOMAIN_ID}"
+  log "expected RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION}"
   log "Sampling window (sec): ${DIAG_SAMPLE_SEC}"
   log "ros2 topic bw enabled: ${DIAG_ENABLE_BW}"
   log "multicast test enabled: ${DIAG_ENABLE_MULTICAST}"
@@ -433,7 +897,7 @@ main() {
   local -a probe_args
 
   log "Task 0/7 (preflight): tooling inventory (existing ROS2 diagnostics only)"
-  "${COMPOSE_CMD[@]}" exec -T "${probe_service}" bash -lc '
+  compose_exec_bash "${probe_service}" '
 set -e
 echo "# ros2 doctor"
 ros2 doctor --help >/dev/null && echo "available"
@@ -451,7 +915,7 @@ echo "# ros2 trace"
 ros2 trace --help >/dev/null && echo "available" || echo "unavailable"
 ' > "${OUT_DIR}/task0_tool_inventory.log" 2>&1 || true
 
-  "${COMPOSE_CMD[@]}" exec -T "${probe_service}" bash -lc '
+  compose_exec_bash "${probe_service}" '
 set -e
 ros2 topic list || true
 ' > "${OUT_DIR}/task0_topic_list.log" 2>&1 || true
@@ -496,8 +960,9 @@ ros2 topic list || true
   } > "${OUT_DIR}/task0_topic_presence.log"
 
   log "Task 1/7: container wall-clock and time namespace checks"
+  local -a clock_probe_pids=()
   for service in "${RUNNING_SERVICES[@]}"; do
-    "${COMPOSE_CMD[@]}" exec -T "${service}" bash -lc "
+    compose_exec_bash "${service}" "
 set -e
 echo \"service=${service}\"
 echo \"utc_iso=\$(date -u +%Y-%m-%dT%H:%M:%S.%N%z)\"
@@ -509,30 +974,18 @@ if [[ -r /proc/self/timens_offsets ]]; then
 else
   echo \"timens_offsets: unavailable\"
 fi
-" > "${OUT_DIR}/task1_clock_${service}.log" 2>&1 || true
+" > "${OUT_DIR}/task1_clock_${service}.log" 2>&1 &
+    clock_probe_pids+=("$!")
+  done
+  for pid in "${clock_probe_pids[@]}"; do
+    wait "${pid}" || true
   done
 
-  "${COMPOSE_CMD[@]}" exec -T "${probe_service}" bash -lc '
-set -e
-echo "probe_service='"${probe_service}"'"
-if ros2 topic list | grep -Fxq /clock; then
-  echo "clock_topic=present"
-else
-  echo "clock_topic=absent"
-fi
-
-echo "nodes:"
-ros2 node list || true
-
-echo "node_use_sim_time:"
-for node in $(ros2 node list 2>/dev/null); do
-  value=$(ros2 param get "$node" use_sim_time 2>/dev/null | awk -F": " "END {print \$2}")
-  if [[ -z "$value" ]]; then
-    value="unavailable"
+  capture_ros_time_params "${probe_service}" "${OUT_DIR}/task1_ros_time_params.log"
+  if [[ "${DIAG_ENFORCE_USE_SIM_TIME_FALSE}" == "1" ]]; then
+    enforce_use_sim_time_false "${probe_service}" "${OUT_DIR}/task1_use_sim_time_enforcement.log"
+    capture_ros_time_params "${probe_service}" "${OUT_DIR}/task1_ros_time_params_post_fix.log"
   fi
-  echo "$node $value"
-done
-' > "${OUT_DIR}/task1_ros_time_params.log" 2>&1 || true
 
   log "Task 2/7: driver stamp-source checks (static + live headers)"
   {
@@ -555,7 +1008,7 @@ done
   } > "${OUT_DIR}/task2_stamp_source_static.log" 2>&1
 
   if service_running emlid; then
-    "${COMPOSE_CMD[@]}" exec -T emlid bash -lc '
+    compose_exec_bash emlid '
 set -e
 echo "node list:"
 ros2 node list || true
@@ -568,7 +1021,7 @@ ros2 param get /nmea_serial_driver use_GNSS_time || true
   for topic in "${RUNTIME_SENSOR_TOPICS[@]}"; do
     topic_file="$(sanitize_topic "${topic}")"
     if is_stamped_topic "${topic}"; then
-      "${COMPOSE_CMD[@]}" exec -T "${probe_service}" bash -lc "
+      compose_exec_bash "${probe_service}" "
 set -e
 echo \"topic=${topic}\"
 echo \"probe_utc_iso=\$(date -u +%Y-%m-%dT%H:%M:%S.%N%z)\"
@@ -579,7 +1032,7 @@ echo \"fallback=ros2 topic echo --once ${topic} | first 40 lines\"
 timeout ${DIAG_SAMPLE_SEC} ros2 topic echo --once ${topic} | sed -n '1,40p'
 " > "${OUT_DIR}/task2_header_${topic_file}.log" 2>&1 || true
     else
-      "${COMPOSE_CMD[@]}" exec -T "${probe_service}" bash -lc "
+      compose_exec_bash "${probe_service}" "
 set -e
 echo \"topic=${topic}\"
 echo \"probe_utc_iso=\$(date -u +%Y-%m-%dT%H:%M:%S.%N%z)\"
@@ -591,7 +1044,7 @@ timeout ${DIAG_SAMPLE_SEC} ros2 topic echo --once ${topic} | sed -n '1,40p'
 
   log "Task 3/7: DDS/RMW/network consistency"
   for service in "${RUNNING_SERVICES[@]}"; do
-    "${COMPOSE_CMD[@]}" exec -T "${service}" bash -lc '
+    compose_exec_bash "${service}" '
 set -e
 echo "ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-unset}"
 echo "RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION:-unset}"
@@ -607,7 +1060,7 @@ ip route || true
 ' > "${OUT_DIR}/task3_env_${service}.log" 2>&1 || true
   done
 
-  "${COMPOSE_CMD[@]}" exec -T "${probe_service}" bash -lc '
+  compose_exec_bash "${probe_service}" '
 set -e
 ros2 doctor --report || true
 ' > "${OUT_DIR}/task3_ros2_doctor.log" 2>&1 || true
@@ -616,11 +1069,11 @@ ros2 doctor --report || true
     local recv_service="${RUNNING_SERVICES[0]}"
     local send_service="${RUNNING_SERVICES[1]}"
     (
-      "${COMPOSE_CMD[@]}" exec -T "${recv_service}" bash -lc 'timeout 8 ros2 multicast receive'
+      compose_exec_bash "${recv_service}" 'timeout 8 ros2 multicast receive'
     ) > "${OUT_DIR}/task3_multicast_test.log" 2>&1 &
     local recv_pid=$!
     sleep 2
-    "${COMPOSE_CMD[@]}" exec -T "${send_service}" bash -lc 'timeout 5 ros2 multicast send' >> "${OUT_DIR}/task3_multicast_test.log" 2>&1 || true
+    compose_exec_bash "${send_service}" 'timeout 5 ros2 multicast send' >> "${OUT_DIR}/task3_multicast_test.log" 2>&1 || true
     wait "${recv_pid}" || true
   fi
 
@@ -638,7 +1091,7 @@ ros2 doctor --report || true
     fi
   fi
 
-  "${COMPOSE_CMD[@]}" exec -T "${probe_service}" bash -lc "
+  compose_exec_bash "${probe_service}" "
 set -e
 if command -v pidstat >/dev/null 2>&1; then
   echo \"cpu_sampler=pidstat\"
@@ -670,10 +1123,24 @@ fi
     done
     probe_args+=(--count-topic "${RUNTIME_ALIGNMENT_LIDAR_TOPIC}" --stamp-topic "${RUNTIME_ALIGNMENT_LIDAR_TOPIC}")
 
-    "${COMPOSE_CMD[@]}" exec -T "${probe_service}" "${probe_args[@]}" > "${OUT_DIR}/task4_window_probe.json" 2> "${OUT_DIR}/task4_window_probe.stderr" || true
+    compose_exec_with_setup "${probe_service}" "${probe_args[@]}" > "${OUT_DIR}/task4_window_probe.json" 2> "${OUT_DIR}/task4_window_probe.stderr" || true
   else
     warn "Window probe script not found at ${DIAG_WINDOW_PROBE_HOST}; skipping pairability/alignment probe."
     echo "{\"status\":\"missing_probe_script\",\"path\":\"${DIAG_WINDOW_PROBE_HOST}\"}" > "${OUT_DIR}/task4_window_probe.json"
+  fi
+
+  if [[ ! -s "${OUT_DIR}/task4_window_probe.json" ]]; then
+    warn "Window probe produced empty output; writing no_data JSON."
+    echo '{"status":"no_data","reason":"empty_output"}' > "${OUT_DIR}/task4_window_probe.json"
+  elif ! python3 - "${OUT_DIR}/task4_window_probe.json" <<'PY'
+import json
+import sys
+with open(sys.argv[1], "r", encoding="utf-8") as f:
+    json.load(f)
+PY
+  then
+    warn "Window probe output is invalid JSON; writing no_data JSON."
+    echo '{"status":"no_data","reason":"invalid_json"}' > "${OUT_DIR}/task4_window_probe.json"
   fi
 
   if [[ -n "${cpu_sampler_pid}" ]]; then
@@ -684,13 +1151,13 @@ fi
 
   for topic in "${RUNTIME_SENSOR_TOPICS[@]}"; do
     topic_file="$(sanitize_topic "${topic}")"
-    "${COMPOSE_CMD[@]}" exec -T "${probe_service}" bash -lc "
+    compose_exec_bash "${probe_service}" "
 set -e
 ros2 topic info --verbose ${topic}
 " > "${OUT_DIR}/task4_qos_${topic_file}.log" 2>&1 || true
 
     if is_stamped_topic "${topic}"; then
-      "${COMPOSE_CMD[@]}" exec -T "${probe_service}" bash -lc "
+      compose_exec_bash "${probe_service}" "
 set -e
 echo \"topic=${topic}\"
 echo \"probe_utc_iso=\$(date -u +%Y-%m-%dT%H:%M:%S.%N%z)\"
@@ -710,7 +1177,7 @@ echo \"--- ros2 topic delay (${DIAG_SAMPLE_SEC}s window) ---\"
 timeout ${DIAG_SAMPLE_SEC} ros2 topic delay ${topic} || true
 " > "${OUT_DIR}/task4_rate_delay_${topic_file}.log" 2>&1 || true
     else
-      "${COMPOSE_CMD[@]}" exec -T "${probe_service}" bash -lc "
+      compose_exec_bash "${probe_service}" "
 set -e
 echo \"topic=${topic}\"
 echo \"probe_utc_iso=\$(date -u +%Y-%m-%dT%H:%M:%S.%N%z)\"
@@ -737,7 +1204,7 @@ echo \"skipped: no standard header.stamp on this packet topic\"
     if [[ -f "${OUT_DIR}/task4_qos_${topic_file}.log" ]]; then
       continue
     fi
-    "${COMPOSE_CMD[@]}" exec -T "${probe_service}" bash -lc "
+    compose_exec_bash "${probe_service}" "
 set -e
 ros2 topic info --verbose ${topic}
 " > "${OUT_DIR}/task4_qos_${topic_file}.log" 2>&1 || true
@@ -747,7 +1214,7 @@ ros2 topic info --verbose ${topic}
   rg -n "qos_overrides|--qos-profile-overrides-path|_qos|SENSOR_DATA|best_effort|reliable|durability" \
     "${REPO_ROOT}/docker" > "${OUT_DIR}/task5_qos_static_scan.log" 2>&1 || true
 
-  "${COMPOSE_CMD[@]}" exec -T "${probe_service}" bash -lc '
+  compose_exec_bash "${probe_service}" '
 set -e
 for node in $(ros2 node list 2>/dev/null); do
   echo "## ${node}"
@@ -787,7 +1254,7 @@ done
 
   for topic in "${RUNTIME_RECORD_TOPICS[@]}"; do
     topic_file="$(sanitize_topic "${topic}")"
-    "${COMPOSE_CMD[@]}" exec -T "${probe_service}" bash -lc "
+    compose_exec_bash "${probe_service}" "
 set -e
 ros2 topic info --verbose ${topic}
 " > "${OUT_DIR}/task6_recorder_compat_${topic_file}.log" 2>&1 || true
@@ -800,7 +1267,7 @@ ros2 topic info --verbose ${topic}
       echo "probe_service=${probe_service}"
     } > "${OUT_DIR}/task7_xsens_validation.log"
 
-    "${COMPOSE_CMD[@]}" exec -T xsens bash -lc '
+    compose_exec_bash xsens '
 set -e
 echo "node_list:"
 ros2 node list || true
@@ -815,7 +1282,7 @@ echo "xsens_publish_imu_data_str_param:"
 ros2 param get /xsens_driver publish_imu_data_str || true
 ' > "${OUT_DIR}/task7_xsens_params.log" 2>&1 || true
 
-    "${COMPOSE_CMD[@]}" exec -T "${probe_service}" bash -lc '
+    compose_exec_bash "${probe_service}" '
 set -e
 ros2 topic list || true
 ' > "${OUT_DIR}/task7_topic_list.log" 2>&1 || true
@@ -860,7 +1327,7 @@ ros2 topic list || true
 
     for topic in "${XSENS_REQUIRED_TOPICS[@]}"; do
       topic_file="$(sanitize_topic "${topic}")"
-      "${COMPOSE_CMD[@]}" exec -T "${probe_service}" bash -lc "
+      compose_exec_bash "${probe_service}" "
 set -e
 echo \"topic=${topic}\"
 echo \"probe_utc_iso=\$(date -u +%Y-%m-%dT%H:%M:%S.%N%z)\"
@@ -883,6 +1350,10 @@ timeout ${DIAG_SAMPLE_SEC} ros2 topic echo --once --field header.stamp ${topic} 
 
   local clock_spread_ms="unknown"
   local ns_mismatch="unknown"
+  local task1_params_summary_file="${OUT_DIR}/task1_ros_time_params.log"
+  if [[ -f "${OUT_DIR}/task1_ros_time_params_post_fix.log" ]]; then
+    task1_params_summary_file="${OUT_DIR}/task1_ros_time_params_post_fix.log"
+  fi
   {
     echo "# Diagnostic Summary"
     echo "run_id=${RUN_ID}"
@@ -909,6 +1380,13 @@ timeout ${DIAG_SAMPLE_SEC} ros2 topic echo --once --field header.stamp ${topic} 
     echo
 
     echo "## Task 0 summary"
+    if [[ -f "${OUT_DIR}/task0_ros_graph_consistency.log" ]]; then
+      grep -E '^graph_consistency=|^expected_network=|^expected_ros_domain_id=|^expected_rmw_implementation=|^ros_domain_status=|^rmw_status=' \
+        "${OUT_DIR}/task0_ros_graph_consistency.log" || true
+    else
+      echo "graph_consistency=unavailable"
+    fi
+    echo
     echo "check_topics_count=${#RUNTIME_CHECK_TOPICS[@]}"
     echo "recording_topics_count=${#RUNTIME_RECORD_TOPICS[@]}"
     if [[ -f "${OUT_DIR}/task0_topic_presence.log" ]]; then
@@ -959,16 +1437,20 @@ timeout ${DIAG_SAMPLE_SEC} ros2 topic echo --once --field header.stamp ${topic} 
       echo "time_namespace_mismatch=unavailable"
     fi
 
-    if [[ -f "${OUT_DIR}/task1_ros_time_params.log" ]]; then
-      grep -m1 "^clock_topic=" "${OUT_DIR}/task1_ros_time_params.log" || true
-      if grep -E "node_use_sim_time:| unavailable" -q "${OUT_DIR}/task1_ros_time_params.log"; then
+    if [[ -f "${task1_params_summary_file}" ]]; then
+      grep -m1 "^clock_topic=" "${task1_params_summary_file}" || true
+      if grep -E "node_use_sim_time:| unavailable" -q "${task1_params_summary_file}"; then
         true
       fi
-      if grep -E " true$" "${OUT_DIR}/task1_ros_time_params.log" >/dev/null 2>&1; then
+      if grep -E " true$" "${task1_params_summary_file}" >/dev/null 2>&1; then
         echo "use_sim_time_true_detected=yes"
       else
         echo "use_sim_time_true_detected=no"
       fi
+    fi
+    if [[ -f "${OUT_DIR}/task1_use_sim_time_enforcement.log" ]]; then
+      grep -E '^enforce_use_sim_time_false=|^set_false_|^changed=|^failed=' \
+        "${OUT_DIR}/task1_use_sim_time_enforcement.log" || true
     fi
     echo
 

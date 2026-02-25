@@ -36,10 +36,19 @@ podman-compose -f docker-compose.debug.yml --profile profiling up -d ros2-tracin
 ```
 
 Notes:
-- `topic-monitor` autostarts by default when its service is up.
+- `topic-monitor` is disabled by default for now (`TOPIC_MONITOR_AUTOSTART=0`).
+- If you enable it, it uses a default topic (`/diagnostics_agg`) as positional argument.
 - `ros2-tracing` starts in idle mode by default (`TRACE_AUTOSTART=0`) to avoid RT-stream impact.
+- ROS graph consistency is enforced by default in diagnostics:
+  - `ROS2_NETWORK_NAME=ros2_net`
+  - `ROS_DOMAIN_ID=0`
+  - `RMW_IMPLEMENTATION=rmw_fastrtps_cpp`
 - Disable if needed:
   - `TOPIC_MONITOR_AUTOSTART=0`
+- Override monitored topic if needed:
+  - `TOPIC_MONITOR_TOPIC=/imu/data`
+- Backward compatibility:
+  - `TOPIC_MONITOR_TOPICS` is still accepted; the runner uses the first topic from that list.
 - Enable tracing capture when needed:
   - `TRACE_AUTOSTART=1`
 - `diagnostic-common` remains opt-in:
@@ -70,9 +79,14 @@ cat docker/diagnostics_runs/<UTC_TIMESTAMP>/summary.txt
 `run_diagnostics_suite.sh` is now preset for this repository/Steam Deck setup:
 - `DIAG_COMPOSE_FILES="docker-compose.yml,docker-compose.debug.yml"`
 - `DIAG_COMPOSE_IMPL=podman`
-- `DIAG_SAMPLE_SEC=6`
+- `DIAG_SAMPLE_SEC=10`
 - `DIAG_ENABLE_BW=0`
 - `DIAG_ENABLE_MULTICAST=0`
+- `DIAG_EXPECTED_ROS_NETWORK=ros2_net`
+- `DIAG_EXPECTED_ROS_DOMAIN_ID=0`
+- `DIAG_EXPECTED_RMW_IMPLEMENTATION=rmw_fastrtps_cpp`
+- `DIAG_ENFORCE_GRAPH_CONSISTENCY=1`
+- `DIAG_ENFORCE_USE_SIM_TIME_FALSE=1`
 - `DIAG_USE_OUSTER_POINTS=1`
 - `DIAG_OUSTER_POINTS_TOPIC=/ouster/points`
 - `DIAG_RECORDING_QOS_OVERRIDES=docker/docker_shared/scripts/diagnostics/recording_qos_overrides.yaml`
@@ -80,7 +94,7 @@ cat docker/diagnostics_runs/<UTC_TIMESTAMP>/summary.txt
 - `DIAG_CAMERA_IMAGE_TOPICS=/camera/color/image_raw,/camera/aligned_depth_to_color/image_raw`
 - `DIAG_CAMERA_METADATA_TOPICS=/camera/color/metadata,/camera/depth/metadata`
 - `DIAG_WINDOW_PROBE_IN_CONTAINER=/shared/scripts/diagnostics/window_topic_probe.py`
-- `run_diagnostics_suite.sh` ensures `topic-monitor` and `ros2-tracing` services are started; tracing capture remains opt-in
+- `run_diagnostics_suite.sh` ensures `ros2-tracing` is started and will start `debug-bridge` if no other target service is running
 
 You can run diagnostics directly without passing env vars:
 
@@ -114,6 +128,8 @@ bash docker/docker_shared/scripts/diagnostics/run_diagnostics_suite.sh
 ## New output files
 
 Key additions in each run folder:
+- `task0_service_detection.log`
+- `task0_ros_graph_consistency.log`
 - `task0_topics_used.log`
 - `task0_topic_presence.log`
 - `task4_window_probe.json`
@@ -127,6 +143,7 @@ Key additions in each run folder:
 - camera pairability mismatch rates
 - LiDAR-camera alignment delta stats (`p50/p95/p99/max`)
 - NIC RX/TX error counter deltas and CPU sampler snippets
+- `window_probe_status` is always structured JSON (`ok`, `no_data`, or `error`)
 
 ## Xsens regression quick checks (auto)
 
@@ -186,7 +203,7 @@ Use this to build and profile baseline vs patched branch.
 The script is preset for Steam Deck as:
 
 - before: `https://github.com/norlab-ulaval/norlab_xsens_driver.git#jazzy`
-- after: `https://github.com/duda1202/norlab_xsens_driver.git#duda1202`
+- after: `https://github.com/duda1202/norlab_xsens_driver.git#perf/buffered-serial-read`
 - compose impl: `podman`
 - image rebuild mode: `XSENS_BENCH_NO_CACHE=1`
 

@@ -5,6 +5,7 @@ networks:
     external: true
   ros2-net:
     driver: bridge
+    name: ${ROS2_NETWORK_NAME:-ros2_net}
 
 services:
   # Sensor Services
@@ -21,6 +22,9 @@ services:
       - ros2-net
     volumes:
       - ./docker_shared:/shared
+    environment:
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-0}
+      - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
     command:
       - ros2
       - launch
@@ -51,6 +55,8 @@ services:
       - XSENS_BAUDRATE=${XSENS_BAUDRATE:-460800}
       - XSENS_DEVICE=${XSENS_DEVICE:-/dev/ttyUSB0}
       - XSENS_FRAME_ID=${XSENS_FRAME_ID:-xsens_imu}
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-0}
+      - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
     command:
       - /shared/scripts/xsens-launch.sh
 
@@ -70,6 +76,9 @@ services:
       - ros2-net
     volumes:
       - ./docker_shared:/shared
+    environment:
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-0}
+      - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
     command:
       - ros2
       - launch
@@ -93,6 +102,9 @@ services:
       - ros2-net
     volumes:
       - ./docker_shared:/shared
+    environment:
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-0}
+      - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
     command:
       - ros2
       - run
@@ -112,6 +124,9 @@ services:
     container_name: ros2-apparatus-foxglove-bridge
     networks:
       - ros2-net
+    environment:
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-0}
+      - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
     ports:
       - 9092:8765
 
@@ -137,6 +152,8 @@ services:
     environment:
       - DISPLAY=${DISPLAY}
       - QT_X11_NO_MITSHM=1
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-0}
+      - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
 
   publisher:
     build:
@@ -156,6 +173,8 @@ services:
       - PYTHONUNBUFFERED=1
       - DISPLAY=${DISPLAY}  # Forward the display for GUI
       - QT_X11_NO_MITSHM=1  # Disable MIT-SHM for X11 forwarding
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-0}
+      - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
     command:
       - ros2
       - launch

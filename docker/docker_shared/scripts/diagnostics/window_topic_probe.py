@@ -191,9 +191,14 @@ class WindowProbe(Node):
                 "max_ms": sorted_deltas[-1],
             }
 
+        total_messages = sum(int(v) for v in self.counts.values())
+        status = "ok" if total_messages > 0 else "no_data"
+
         return {
-            "status": "ok",
+            "status": status,
+            "reason": "no_messages_received" if status == "no_data" else "ok",
             "duration_sec": self.duration_sec,
+            "total_messages": total_messages,
             "count_topics": self.count_topics,
             "stamp_topics": sorted(self.stamp_topics),
             "topic_types": self.topic_types,
@@ -216,22 +221,34 @@ def main() -> int:
     parser.add_argument("--align-topic", action="append", type=parse_pair, default=[])
     args = parser.parse_args()
 
-    rclpy.init(args=None)
-    node = WindowProbe(
-        duration_sec=float(args.duration_sec),
-        count_topics=[str(t) for t in args.count_topic],
-        stamp_topics=[str(t) for t in args.stamp_topic],
-        pair_topics=list(args.pair_topic),
-        align_topics=list(args.align_topic),
-        discovery_wait_sec=float(args.discovery_wait_sec),
-    )
+    node: WindowProbe | None = None
+    result: Dict[str, object] = {}
+    exit_code = 0
     try:
+        rclpy.init(args=None)
+        node = WindowProbe(
+            duration_sec=float(args.duration_sec),
+            count_topics=[str(t) for t in args.count_topic],
+            stamp_topics=[str(t) for t in args.stamp_topic],
+            pair_topics=list(args.pair_topic),
+            align_topics=list(args.align_topic),
+            discovery_wait_sec=float(args.discovery_wait_sec),
+        )
         result = node.run()
-        print(json.dumps(result, sort_keys=True))
+    except Exception as exc:
+        result = {"status": "error", "error": str(exc)}
+        exit_code = 1
     finally:
-        node.destroy_node()
-        rclpy.shutdown()
-    return 0
+        if node is not None:
+            node.destroy_node()
+        try:
+            if rclpy.ok():
+                rclpy.shutdown()
+        except Exception:
+            pass
+
+    print(json.dumps(result, sort_keys=True))
+    return exit_code
 
 
 if __name__ == "__main__":
