@@ -31,6 +31,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.xsens
+      args:
+        XSENS_REPO_URL: ${XSENS_REPO_URL:-https://github.com/norlab-ulaval/norlab_xsens_driver.git}
+        XSENS_REPO_BRANCH: ${XSENS_REPO_BRANCH:-jazzy}
     image: ros2-apparatus-xsens:jazzy
     stdin_open: true
     tty: true
@@ -42,6 +45,12 @@ services:
       - ros2-net
     volumes:
       - ./docker_shared:/shared
+    environment:
+      - XSENS_USE_SHARED_OVERLAY=${XSENS_USE_SHARED_OVERLAY:-1}
+      - XSENS_TIMEOUT=${XSENS_TIMEOUT:-0.002}
+      - XSENS_BAUDRATE=${XSENS_BAUDRATE:-460800}
+      - XSENS_DEVICE=${XSENS_DEVICE:-/dev/ttyUSB0}
+      - XSENS_FRAME_ID=${XSENS_FRAME_ID:-xsens_imu}
     command:
       - /shared/scripts/xsens-launch.sh
 

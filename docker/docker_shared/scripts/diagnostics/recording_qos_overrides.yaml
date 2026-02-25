@@ -1,0 +1,53 @@
+/ouster/lidar_packets:
+  reliability: best_effort
+  durability: volatile
+  history: keep_last
+  depth: 1000
+
+/ouster/imu_packets:
+  reliability: best_effort
+  durability: volatile
+  history: keep_last
+  depth: 200
+
+/ouster/points:
+  reliability: best_effort
+  durability: volatile
+  history: keep_last
+  depth: 5
+
+/camera/color/image_raw:
+  reliability: best_effort
+  durability: volatile
+  history: keep_last
+  depth: 10
+
+/camera/aligned_depth_to_color/image_raw:
+  reliability: best_effort
+  durability: volatile
+  history: keep_last
+  depth: 10
+
+/imu/data:
+  reliability: best_effort
+  durability: volatile
+  history: keep_last
+  depth: 50
+
+/fix:
+  reliability: reliable
+  durability: volatile
+  history: keep_last
+  depth: 10
+
+/diagnostics:
+  reliability: reliable
+  durability: volatile
+  history: keep_last
+  depth: 50
+
+/diagnostics_agg:
+  reliability: reliable
+  durability: volatile
+  history: keep_last
+  depth: 50

@@ -1,0 +1,4 @@
+/ouster/os_driver:
+  ros__parameters:
+    # Include packets + IMU + points so delay can be measured on stamped clouds.
+    proc_mask: "RAW|IMU|PCL"

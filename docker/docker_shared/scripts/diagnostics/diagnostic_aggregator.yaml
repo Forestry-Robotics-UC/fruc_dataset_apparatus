@@ -1,0 +1,33 @@
+diagnostic_aggregator:
+  ros__parameters:
+    pub_rate: 1.0
+    base_path: observability
+    analyzers:
+      sensors:
+        type: diagnostic_aggregator/AnalyzerGroup
+        path: sensors
+        analyzers:
+          ouster:
+            type: diagnostic_aggregator/GenericAnalyzer
+            path: ouster
+            contains:
+              - ouster
+              - os_driver
+          realsense:
+            type: diagnostic_aggregator/GenericAnalyzer
+            path: realsense
+            contains:
+              - realsense
+              - camera
+          xsens:
+            type: diagnostic_aggregator/GenericAnalyzer
+            path: xsens
+            contains:
+              - xsens
+              - mtnode
+          emlid:
+            type: diagnostic_aggregator/GenericAnalyzer
+            path: emlid
+            contains:
+              - nmea
+              - gps

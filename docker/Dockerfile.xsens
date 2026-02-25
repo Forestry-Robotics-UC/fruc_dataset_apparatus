@@ -4,17 +4,22 @@ FROM ros:jazzy-ros-base
 RUN apt update && apt install -y --no-install-recommends \
     build-essential \
     git \
+    procps \
     python3-colcon-common-extensions \
     python3-pip \
     python3-rosdep \
     python3-rosinstall-generator \
     python3-vcstool \
+    strace \
     wget \
     unzip
 
 WORKDIR /docker_ws/src/
 
-RUN git clone -b jazzy https://github.com/norlab-ulaval/norlab_xsens_driver.git && rosdep install --from-paths . --ignore-src  -r -y 
+ARG XSENS_REPO_URL=https://github.com/norlab-ulaval/norlab_xsens_driver.git
+ARG XSENS_REPO_BRANCH=jazzy
+RUN git clone -b ${XSENS_REPO_BRANCH} ${XSENS_REPO_URL} norlab_xsens_driver && \
+    rosdep install --from-paths . --ignore-src  -r -y 
 
 #Hotfix patch to a pressure error (force casting as a float) -- Only needed ROS2 Jazzy branch
 RUN sed -i "s/o\['Pressure'\]/float(o\['Pressure'\])/g" /docker_ws/src/norlab_xsens_driver/xsens_driver/mtnode.py

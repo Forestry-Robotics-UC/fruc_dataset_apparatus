@@ -1,6 +1,3 @@
- 
-version: "3.9"
-
 services:
   debug-bridge:
     build:
@@ -43,6 +40,84 @@ services:
     environment:
       - ROS_DOMAIN_ID=0
       # - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+
+  diagnostic-common:
+    build:
+      context: .
+      dockerfile: Dockerfile.debug
+    image: ros2-apparatus-debug:jazzy
+    container_name: ros2-apparatus-diagnostic-common
+    stdin_open: true
+    tty: true
+    privileged: true
+    networks:
+      - ros2-net
+    profiles:
+      - observability
+    volumes:
+      - ./docker_shared:/shared
+    command:
+      - /shared/scripts/diagnostics/diagnostic_common_runner.sh
+
+  topic-monitor:
+    build:
+      context: .
+      dockerfile: Dockerfile.debug
+    image: ros2-apparatus-debug:jazzy
+    container_name: ros2-apparatus-topic-monitor
+    stdin_open: true
+    tty: true
+    privileged: true
+    networks:
+      - ros2-net
+    profiles:
+      - observability
+    volumes:
+      - ./docker_shared:/shared
+    command:
+      - /shared/scripts/diagnostics/topic_monitor_runner.sh
+
+  diagnostic-aggregator:
+    build:
+      context: .
+      dockerfile: Dockerfile.debug
+    image: ros2-apparatus-debug:jazzy
+    container_name: ros2-apparatus-diagnostic-aggregator
+    stdin_open: true
+    tty: true
+    privileged: true
+    networks:
+      - ros2-net
+    profiles:
+      - observability
+    volumes:
+      - ./docker_shared:/shared
+    command:
+      - ros2
+      - run
+      - diagnostic_aggregator
+      - aggregator_node
+      - --ros-args
+      - --params-file
+      - /shared/scripts/diagnostics/diagnostic_aggregator.yaml
+
+  ros2-tracing:
+    build:
+      context: .
+      dockerfile: Dockerfile.debug
+    image: ros2-apparatus-debug:jazzy
+    container_name: ros2-apparatus-ros2-tracing
+    stdin_open: true
+    tty: true
+    privileged: true
+    networks:
+      - ros2-net
+    profiles:
+      - profiling
+    volumes:
+      - ./docker_shared:/shared
+    command:
+      - /shared/scripts/diagnostics/ros2_tracing_runner.sh
 
 networks:
   ros2-net:
