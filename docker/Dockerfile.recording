@@ -31,7 +31,7 @@ WORKDIR /docker_ws/
 
 RUN apt install -y libboost-all-dev
 
-RUN . /opt/ros/jazzy/setup.sh && colcon build --packages-up-to ouster_sensor_msgs hector_recorder hector_recorder_msgs
+RUN . /opt/ros/jazzy/setup.sh && colcon build --packages-up-to ouster_sensor_msgs hector_recorder hector_recorder_msgs realsense2_camera_msgs
 
 COPY ./docker_build/entrypoint.sh /entrypoint.sh
 
