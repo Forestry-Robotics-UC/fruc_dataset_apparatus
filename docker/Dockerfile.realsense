@@ -23,7 +23,7 @@ RUN apt-get update && \
 
 # Clone and build librealsense with DKMS
 WORKDIR /tmp/
-RUN git clone https://github.com/IntelRealSense/librealsense.git
+RUN git clone https://github.com/IntelRealSense/librealsense.git --branch v2.56.4 --single-branch
 
 WORKDIR /tmp/librealsense/build
 RUN mkdir -p /tmp/librealsense/build

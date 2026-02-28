@@ -125,7 +125,8 @@ ouster/os_driver:
     # mask_path[optional]: path to an image file that will be used to mask parts of the
     # pointcloud.
     mask_path: ''
-
+    #
     phase_lock_enable: true
+    #
     phase_lock_offset: 0
 
