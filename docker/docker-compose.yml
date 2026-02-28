@@ -21,6 +21,7 @@ services:
       - ros2-net
     volumes:
       - ./docker_shared:/shared
+      - /dev:/dev
     command:
       - ros2
       - launch
