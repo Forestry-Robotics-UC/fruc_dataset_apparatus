@@ -1,22 +1,16 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robot">
-<!-- Property quick access -->
-<xacro:property name="ouster_z_offset" value="0.206440" />
-<xacro:property name="xsens_x_offset" value="${-0.015121}" />
-<xacro:property name="xsens_y_offset" value="${-0.046950}" />
-<xacro:property name="xsens_z_offset" value="0.0586" />
-<xacro:property name="realsense_x_offset" value="-0.031" />
-<xacro:property name="realsense_y_offset" value="0.058" />
-<xacro:property name="realsense_z_offset" value="0.082" />
-<material name="orange">
-<color rgba="1 0.3 0.1 1"/>
-</material>
+<xacro:property name="mesh_dir" value="/home/tobias/Development/fruc_dataset_apparatus/docker/docker_shared/apparatus_description/meshes"/>
+<!-- Mesh path prefix -->
+<xacro:property name="mesh_prefix" value="package://apparatus_description/meshes" />
+
 <!-- BASE LINK -->
 <link name="base_link">
 <visual>
 <origin xyz="0 0 0" rpy="0 0 0" />
 <geometry>
-<mesh filename="apperatus.obj" />
+<!-- <mesh filename="${mesh_prefix}meshes/apperatus.obj" /> -->
+<mesh filename="${mesh_prefix}/apperatus.obj" />
 </geometry>
 </visual>
 </link>
@@ -26,6 +20,8 @@
 <link name="os_imu" />
 <!-- XSENS LINKS -->
 <link name="xsens_imu" />
+<!-- GPS LINKS -->
+<link name="gps_link" />
 <!-- REALSENSE LINKS -->
 <link name="camera_link" />
 <link name="camera_depth_frame" />
@@ -36,7 +32,7 @@
 <joint name="base_link_to_os_sensor" type="fixed">
 <parent link="base_link" />
 <child link="os_sensor" />
-<origin xyz="0 0 ${ouster_z_offset}" rpy="0 0 ${pi}" />
+<origin xyz="0 0 0.206440" rpy="0 0 ${pi}" />
 </joint>
 <joint name="os_sensor_to_os_lidar" type="fixed">
 <parent link="os_sensor" />
@@ -44,52 +40,61 @@
 <origin xyz="0 0 0" rpy="0 0 0" />
 </joint>
 
-<!-- ADDED: calibrated transform from os_lidar to camera_color_optical_frame -->
-<joint name="joint_os_lidar_to_camera_color_optical_frame" type="fixed">
-  <parent link="os_lidar" />
-  <child link="camera_color_optical_frame" />
-  <origin xyz="0.058960175597447755 -0.05926519968081257 -0.12450093895353376" rpy="-1.582383985058795 0.026185463421295477 -3.138555276364755" />
-</joint>
-
 <!-- UPDATED: Calibrated IMU position based on Kalibr camera-IMU calibration -->
 <joint name="os_sensor_to_os_imu" type="fixed">
 <parent link="os_sensor" />
 <child link="os_imu" />
-<origin xyz="-0.03516933627986119 0.026844313894637633 0.05514881960085294" 
+<origin xyz="-0.03516933627986119 0.026844313894637633 0.0514881960085294" 
         rpy="0.0527437133816158 -0.06297509863959863 1.5228784764076906" />
 </joint>
 <!-- XSENS JOINTS -->
 <joint name="base_link_to_xsens_imu" type="fixed">
 <parent link="base_link" />
 <child link="xsens_imu" />
-<origin xyz="${xsens_x_offset} ${xsens_y_offset} ${xsens_z_offset}" rpy="0 0 0" />
+<origin xyz="-0.015121 -0.046950 0.0586" rpy="0 0 0" />
+</joint>
+<!-- GPS JOINTS -->
+<joint name="base_link_to_gps_link" type="fixed">
+<parent link="base_link" />
+<child link="gps_link" />
+<origin xyz="0 -0.128 0.012" rpy="0 0 0" />
 </joint>
 <!-- CALIBRATED CAMERA JOINT (Position unchanged from lidar-camera calibration) -->
 <joint name="joint_os_sensor_to_camera_link" type="fixed">
-<parent link="os_sensor" />
-<child link="camera_link" />
-<origin xyz="-0.018599905044461885 0.08479126746983127 -0.09082252118430068"
-        rpy="0.0013625367954899733 0.003069697768602153 1.558103710329454" />
+  <parent link="os_sensor" />
+  <child link="camera_link" />
+  <origin
+    xyz="0.01424664 -0.07454732 -0.12227248"
+    rpy="0.0013625367954899733 0.003069697768602153 ${pi + 1.558103710329454}" />
 </joint>
 <!-- REALSENSE JOINTS -->
-<joint name="camera_link_to_depth_frame" type="fixed">
-<parent link="camera_link" />
-<child link="camera_depth_frame" />
-<origin xyz="0 0 0" rpy="0 0 0" />
+<!-- camera_link → camera_depth_frame (identity) -->
+<joint name="camera_link_to_camera_depth_frame" type="fixed">
+  <parent link="camera_link"/>
+  <child link="camera_depth_frame"/>
+  <origin xyz="0 0 0" rpy="0 0 0"/>
 </joint>
-<joint name="camera_depth_frame_to_optical" type="fixed">
-<parent link="camera_depth_frame" />
-<child link="camera_depth_optical_frame" />
-<origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
+
+<!-- camera_depth_frame → camera_depth_optical_frame -->
+<joint name="camera_depth_frame_to_camera_depth_optical_frame" type="fixed">
+  <parent link="camera_depth_frame"/>
+  <child link="camera_depth_optical_frame"/>
+  <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
 </joint>
-<joint name="camera_link_to_color_frame" type="fixed">
-<parent link="camera_link" />
-<child link="camera_color_frame" />
-<origin xyz="0 0 0" rpy="0 0 0" />
+
+<!-- camera_link → camera_color_frame (CALIBRATED) -->
+<joint name="camera_link_to_camera_color_frame" type="fixed">
+  <parent link="camera_link"/>
+  <child link="camera_color_frame"/>
+  <origin
+    xyz="-0.000466 0.014719 0.000251"
+    rpy="0.012458 0.003109 0.003694"/>
 </joint>
-<joint name="camera_color_frame_to_optical" type="fixed">
-<parent link="camera_color_frame" />
-<child link="camera_color_optical_frame" />
-<origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}" />
+
+<!-- camera_color_frame → camera_color_optical_frame -->
+<joint name="camera_color_frame_to_camera_color_optical_frame" type="fixed">
+  <parent link="camera_color_frame"/>
+  <child link="camera_color_optical_frame"/>
+  <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
 </joint>
 </robot>

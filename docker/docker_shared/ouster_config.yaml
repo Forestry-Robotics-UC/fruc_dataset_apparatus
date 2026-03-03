@@ -60,7 +60,7 @@ ouster/os_driver:
     # pub_static_tf[optional]: when this flag is set to True, the driver will
     # broadcast the TF transforms for the imu/sensor/lidar frames. Prevent the
     # driver from broadcasting TF transforms by setting this parameter to False.
-    pub_static_tf: true
+    pub_static_tf: false
     # proc_mask[optional]: use any combination of the 6 flags IMG, PCL, IMU, SCAN
     # RAW and TLM to enable or disable their respective messages.
     proc_mask: "RAW" # Only publish RAW|IMU|PCL packets
