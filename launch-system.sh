@@ -103,7 +103,7 @@ confirm=$(kdialog --yesno "Start recording named:\n '$recording_name'\n\nTopics:
 
 if [ $? -eq 0 ]; then
     #Launch the compose files
-    cd "$SCRIPT_DIR/docker"
+    cd "$SCRIPT_DIR"
 
     (sleep 8 && podman-compose -f docker-compose.yml up -d publisher ouster realsense xsens emlid > /dev/null 2>&1) &
 

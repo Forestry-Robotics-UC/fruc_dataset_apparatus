@@ -96,7 +96,7 @@ zenity --question --title="Confirm Recording" --text="Start recording named:\n '
 
 if [ $? -eq 0 ]; then
     #Launch the compose files
-    cd "$SCRIPT_DIR/docker"
+    cd "$SCRIPT_DIR"
 
     (sleep 8 && docker compose up -d publisher ouster realsense xsens emlid > /dev/null 2>&1) &
 
