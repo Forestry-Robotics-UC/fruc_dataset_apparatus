@@ -104,9 +104,9 @@ if [ $? -eq 0 ]; then
     cmd2="ros2 bag info /rosbags/$recording_name > /rosbags/$recording_name/info.txt"
 
     #Start recording container
-    docker compose run --rm recording $cmd1
+    docker compose run --rm recording none $cmd1
     #After recording is done, get the bag info
-    docker compose run --rm recording /bin/bash -c "$cmd2"
+    docker compose run --rm recording none /bin/bash -c "$cmd2"
 else
     zenity --info --text="Recording Cancelled."
 fi

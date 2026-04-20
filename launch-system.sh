@@ -111,9 +111,9 @@ if [ $? -eq 0 ]; then
     cmd2="ros2 bag info /rosbags/$recording_name > /rosbags/$recording_name/info.txt"
 
     #Start recording container
-    podman-compose run --rm recording $cmd1
+    podman-compose run --rm recording none $cmd1
     #After recording is done, get the bag info
-    podman-compose run --rm recording /bin/bash -c "$cmd2"
+    podman-compose run --rm recording none /bin/bash -c "$cmd2"
 else
     kdialog --sorry "Recording Cancelled."
 fi
