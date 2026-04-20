@@ -9,6 +9,10 @@
 	path = docker_ws/src/ouster-ros
 	url = https://github.com/errorcodecritical/ouster-ros.git
 	branch = ros2
+[submodule "docker_ws/src/ouster-ros"]
+	path = docker_ws/src/ouster-ros
+	url = https://github.com/errorcodecritical/ouster-ros.git
+	branch = ros2
 [submodule "docker_ws/src/hector_recorder"]
 	path = docker_ws/src/hector_recorder
 	url = https://github.com/tu-darmstadt-ros-pkg/hector_recorder.git
