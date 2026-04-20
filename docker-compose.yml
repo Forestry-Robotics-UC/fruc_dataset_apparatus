@@ -24,6 +24,7 @@ services:
       - ./docker_ws:/docker_ws
       - /dev:/dev
     command:
+      - "rslaunch,realsense2_camera"
       - ros2
       - launch
       - rslaunch
@@ -47,6 +48,7 @@ services:
       - ./shared:/shared
       - ./docker_ws:/docker_ws
     command:
+      - xsens_driver
       - /shared/scripts/xsens-launch.sh
 
   ouster:
@@ -67,6 +69,7 @@ services:
       - ./shared:/shared
       - ./docker_ws:/docker_ws
     command:
+      - ouster_ros
       - ros2
       - launch
       - ouster_ros
@@ -91,6 +94,7 @@ services:
       - ./shared:/shared
       - ./docker_ws:/docker_ws
     command:
+      - nmea_navsat_driver
       - ros2
       - run
       - nmea_navsat_driver
@@ -131,7 +135,8 @@ services:
       - ./shared:/shared
       - ./docker_ws:/docker_ws
       - ../rosbags:/rosbags
-    command: ${SCRIPT_ARGS:-}
+    command:
+      - hector_recorder
     environment:
       - DISPLAY=${DISPLAY}
       - QT_X11_NO_MITSHM=1
@@ -156,6 +161,7 @@ services:
       - DISPLAY=${DISPLAY}  # Forward the display for GUI
       - QT_X11_NO_MITSHM=1  # Disable MIT-SHM for X11 forwarding
     command:
+      - apparatus_description
       - ros2
       - launch
       - apparatus_description

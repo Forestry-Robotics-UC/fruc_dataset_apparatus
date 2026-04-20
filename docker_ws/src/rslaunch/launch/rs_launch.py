@@ -17,9 +17,8 @@ import os
 import yaml
 from launch import LaunchDescription
 import launch_ros.actions
-from launch.actions import DeclareLaunchArgument, OpaqueFunction, LogInfo, IncludeLaunchDescription
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.actions import DeclareLaunchArgument, OpaqueFunction, LogInfo
+from launch.substitutions import LaunchConfiguration
 
 configurable_parameters = [{'name': 'camera_name',                  'default': 'camera', 'description': 'camera unique name'},
                            {'name': 'camera_namespace',             'default': '', 'description': 'namespace for camera'},
@@ -93,6 +92,18 @@ configurable_parameters = [{'name': 'camera_name',                  'default': '
                            {'name': 'wait_for_device_timeout',      'default': '-1.', 'description': 'Timeout for waiting for device to connect (Seconds)'},
                            {'name': 'reconnect_timeout',            'default': '6.', 'description': 'Timeout(seconds) between consequtive reconnection attempts'},
                            {'name': 'base_frame_id',                'default': 'link', 'description': 'Root frame of the sensors transform tree'},
+                           # --- Image transport compression (native driver) ---
+                           # Restrict color image_raw to raw-only to suppress the default
+                           # compressed sidecar — compressed is published explicitly below.
+                           {'name': 'camera.color.image_raw.enable_pub_plugins',
+                                                                    'default': "['image_transport/raw', 'image_transport/compressed']",
+                                                                    'description': 'image_transport plugins to enable for color image_raw'},
+                           {'name': 'camera.color.image_raw.compressed.format',
+                                                                    'default': 'jpeg',
+                                                                    'description': 'Compressed image format: jpeg or png'},
+                           {'name': 'camera.color.image_raw.compressed.jpeg_quality',
+                                                                    'default': '50',
+                                                                    'description': 'JPEG compression quality (1-100). 1=max compression, 100=max quality'},
                           ]
 
 def declare_configurable_parameters(parameters):
@@ -145,17 +156,4 @@ def launch_setup(context, params, param_name_suffix=''):
 def generate_launch_description():
     return LaunchDescription(declare_configurable_parameters(configurable_parameters) + [
         OpaqueFunction(function=launch_setup, kwargs = {'params' : set_configurable_parameters(configurable_parameters)}),
-        # Include image transport relay for compression
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                PathJoinSubstitution([
-                    os.path.dirname(__file__),
-                    'image_transport_relay.py'
-                ])
-            ),
-            launch_arguments={
-                'camera_namespace': LaunchConfiguration('camera_namespace'),
-                'camera_name': 'color',
-            }.items(),
-        )
     ])

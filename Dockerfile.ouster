@@ -3,7 +3,10 @@ FROM ros:jazzy-ros-base
 
 ENV OUSTER_HOSTNAME="169.254.49.182"
 
-RUN apt update && apt install -y --no-install-recommends \
+# Fix apt mirrors
+RUN sed -i 's|http://archive.ubuntu.com/ubuntu|http://azure.archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list.d/ubuntu.sources
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
     git \
@@ -14,6 +17,13 @@ RUN apt update && apt install -y --no-install-recommends \
     python3-vcstool \
     unzip \
     wget
+
+# Copy only ouster-ros package (contains nested ouster_ros and ouster_sensor_msgs), install dependencies, then clean up
+COPY ./docker_ws/src/ouster-ros /tmp/docker_ws_build/src/ouster-ros
+RUN rosdep update && \
+    rosdep install --from-paths /tmp/docker_ws_build/src/ouster-ros -y --ignore-src 2>/dev/null || true && \
+    rm -rf /tmp/docker_ws_build && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /docker_ws

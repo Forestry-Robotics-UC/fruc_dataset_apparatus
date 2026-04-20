@@ -1,7 +1,10 @@
 #RECORDING
 FROM ros:jazzy-ros-base
 
-RUN apt update && apt install -y --no-install-recommends \
+# Fix apt mirrors
+RUN sed -i 's|http://archive.ubuntu.com/ubuntu|http://azure.archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list.d/ubuntu.sources
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
     git \
@@ -11,12 +14,19 @@ RUN apt update && apt install -y --no-install-recommends \
     python3-rosinstall-generator \
     python3-vcstool \
     unzip \
-    wget
+    wget \
+    ncurses-dev \
+    libboost-all-dev
+
+# Copy only hector_recorder package, install its dependencies, then clean up
+COPY ./docker_ws/src/hector_recorder /tmp/docker_ws_build/src/hector_recorder
+RUN rosdep update && \
+    rosdep install --from-paths /tmp/docker_ws_build/src/hector_recorder -y --ignore-src 2>/dev/null || true && \
+    rm -rf /tmp/docker_ws_build && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /docker_ws
-
-RUN apt install -y libboost-all-dev
 
 COPY ./docker_entrypoint.sh /entrypoint.sh
 

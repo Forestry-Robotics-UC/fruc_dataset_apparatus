@@ -23,7 +23,15 @@ RUN apt-get update && \
     ros-jazzy-compressed-image-transport \
     ros-jazzy-diagnostic-updater \
     ros-jazzy-sensor-msgs \
-    ros-jazzy-std-srvs
+    ros-jazzy-std-srvs \
+    python3-colcon-common-extensions
+
+# Copy only realsense-ros package, install its dependencies, then clean up
+COPY ./docker_ws/src/realsense-ros /tmp/docker_ws_build/src/realsense-ros
+RUN rosdep update && \
+    rosdep install --from-paths /tmp/docker_ws_build/src/realsense-ros -y --ignore-src --skip-keys "librealsense2" 2>/dev/null || true && \
+    rm -rf /tmp/docker_ws_build && \
+    rm -rf /var/lib/apt/lists/*
 
 # Clone and build librealsense with DKMS
 WORKDIR /tmp/
