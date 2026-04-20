@@ -35,6 +35,8 @@ topics=$(kdialog --checklist "Topics to record" \
     /ouster/range_image "Ouster Range Image" off \
     /ouster/reflec_image "Ouster Reflectivity Image" off \
     /camera/color/image_raw "Realsense Color" on \
+    /camera/color/image_raw/compressed "Realsense Color (JPEG Compressed)" on \
+    /camera/color/image_raw/png "Realsense Color (PNG Lossless)" off \
     /camera/color/camera_info "Realsense Color Camera Info" on \
     /camera/aligned_depth_to_color/camera_info "Realsense Aligned Depth to Color" on \
     /camera/aligned_depth_to_color/image_raw "Realsense Align Depth" on \

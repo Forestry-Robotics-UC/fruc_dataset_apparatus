@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robot">
-<xacro:property name="mesh_dir" value="/home/tobias/Development/fruc_dataset_apparatus/docker/docker_shared/apparatus_description/meshes"/>
+<xacro:property name="mesh_dir" value="$(find apparatus_description)/meshes"/>
 <!-- Mesh path prefix -->
 <xacro:property name="mesh_prefix" value="package://apparatus_description/meshes" />
 

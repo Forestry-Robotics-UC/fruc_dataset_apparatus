@@ -11,15 +11,10 @@ RUN apt update --fix-missing && apt install -y \
     python3-rosinstall-generator \
     python3-vcstool
 
-WORKDIR /docker_ws/src/
-
-RUN git clone -b ros2 https://github.com/ros-drivers/nmea_navsat_driver.git && rosdep install --from-paths . -y --ignore-src
-
+# Set working directory
 WORKDIR /docker_ws
 
-RUN . /opt/ros/jazzy/setup.sh && colcon build --packages-up-to nmea_navsat_driver
-
-COPY ./docker_build/entrypoint.sh /entrypoint.sh
+COPY ./docker_entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh
 

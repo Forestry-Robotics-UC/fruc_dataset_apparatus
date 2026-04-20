@@ -1,12 +1,15 @@
 FROM ros:jazzy-ros-base
 
 # Install dependencies
+RUN sed -i 's|http://archive.ubuntu.com/ubuntu|http://azure.archive.ubuntu.com/ubuntu|g' /etc/apt/sources.list.d/ubuntu.sources
+
 RUN apt-get update && \
     apt-get install -y \
     build-essential \
     git \
     cmake \
     wget \
+    python3-rosdep \
     libx11-dev \
     libxrandr-dev \
     libxinerama-dev \
@@ -17,13 +20,14 @@ RUN apt-get update && \
     libusb-1.0-0-dev \
     ros-jazzy-cv-bridge \
     ros-jazzy-image-transport \
+    ros-jazzy-compressed-image-transport \
     ros-jazzy-diagnostic-updater \
     ros-jazzy-sensor-msgs \
     ros-jazzy-std-srvs
 
 # Clone and build librealsense with DKMS
 WORKDIR /tmp/
-RUN git clone https://github.com/IntelRealSense/librealsense.git --branch v2.56.4 --single-branch
+RUN git clone https://github.com/IntelRealSense/librealsense.git --single-branch
 
 WORKDIR /tmp/librealsense/build
 RUN mkdir -p /tmp/librealsense/build
@@ -33,26 +37,9 @@ RUN cmake .. -DFORCE_RSUSB_BACKEND=true -DCMAKE_BUILD_TYPE=Release && \
     ldconfig
 
 # Set up workspace
-WORKDIR /docker_ws/src/
-    
-# Clone realsense ROS package
-RUN git clone https://github.com/IntelRealSense/realsense-ros.git
+WORKDIR /docker_ws
 
-# Copy custom launch files
-COPY ./docker_build/rslaunch rslaunch
-
-# Install ROS dependencies using rosdep
-WORKDIR /docker_ws/
-RUN . /opt/ros/jazzy/setup.sh && \
-    rosdep update && \
-    rosdep install --from-paths src -y --ignore-src \
-    --skip-keys "librealsense2"
-
-# Build the workspace
-RUN . /opt/ros/jazzy/setup.sh && \
-    colcon build --symlink-install
-
-COPY ./docker_build/entrypoint.sh /entrypoint.sh
+COPY ./docker_entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh
 

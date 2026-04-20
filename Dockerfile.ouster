@@ -15,16 +15,10 @@ RUN apt update && apt install -y --no-install-recommends \
     unzip \
     wget
 
-WORKDIR /docker_ws/src/
+# Set working directory
+WORKDIR /docker_ws
 
-RUN git clone -b ros2 --recurse-submodules https://github.com/errorcodecritical/ouster-ros 
-RUN rosdep update && rosdep install --from-paths . -y --ignore-src
-
-WORKDIR /docker_ws/
-
-RUN . /opt/ros/jazzy/setup.sh && colcon build --packages-up-to ouster_ros
-
-COPY ./docker_build/entrypoint.sh /entrypoint.sh
+COPY ./docker_entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh
 

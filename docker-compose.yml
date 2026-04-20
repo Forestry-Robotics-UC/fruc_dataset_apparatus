@@ -20,7 +20,8 @@ services:
     networks:
       - ros2-net
     volumes:
-      - ./docker_shared:/shared
+      - ./shared:/shared
+      - ./docker_ws:/docker_ws
       - /dev:/dev
     command:
       - ros2
@@ -43,7 +44,8 @@ services:
     networks:
       - ros2-net
     volumes:
-      - ./docker_shared:/shared
+      - ./shared:/shared
+      - ./docker_ws:/docker_ws
     command:
       - /shared/scripts/xsens-launch.sh
 
@@ -62,7 +64,8 @@ services:
     networks:
       - ros2-net
     volumes:
-      - ./docker_shared:/shared
+      - ./shared:/shared
+      - ./docker_ws:/docker_ws
     command:
       - ros2
       - launch
@@ -85,7 +88,8 @@ services:
     networks:
       - ros2-net
     volumes:
-      - ./docker_shared:/shared
+      - ./shared:/shared
+      - ./docker_ws:/docker_ws
     command:
       - ros2
       - run
@@ -124,7 +128,8 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       # Mount home directory for X11 authentication
       - ${HOME}/.Xauthority:/root/.Xauthority:rw
-      - ./docker_shared:/shared
+      - ./shared:/shared
+      - ./docker_ws:/docker_ws
       - ../rosbags:/rosbags
     command: ${SCRIPT_ARGS:-}
     environment:
@@ -143,7 +148,8 @@ services:
     networks:
       - ros2-net
     volumes:
-      - ./docker_shared:/shared
+      - ./shared:/shared
+      - ./docker_ws:/docker_ws
       - /tmp/.X11-unix:/tmp/.X11-unix  # X11 socket for GUI
     environment:
       - PYTHONUNBUFFERED=1

@@ -1,0 +1,26 @@
+#RECORDING
+FROM ros:jazzy-ros-base
+
+RUN apt update && apt install -y --no-install-recommends \
+    build-essential \
+    cmake \
+    git \
+    python3-colcon-common-extensions \
+    python3-pip \
+    python3-rosdep \
+    python3-rosinstall-generator \
+    python3-vcstool \
+    unzip \
+    wget
+
+# Set working directory
+WORKDIR /docker_ws
+
+RUN apt install -y libboost-all-dev
+
+COPY ./docker_entrypoint.sh /entrypoint.sh
+
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT [ "/entrypoint.sh" ]
+CMD [ "/bin/bash" ]

@@ -35,6 +35,8 @@ topics=$(zenity --list --checklist --title="Select Topics" --text="Topics to rec
     FALSE "/ouster/range_image" "Ouster Range Image" \
     FALSE "/ouster/reflec_image" "Ouster Reflectivity Image" \
     TRUE "/camera/color/image_raw" "Realsense Color" \
+    TRUE "/camera/color/image_raw/compressed" "Realsense Color (JPEG Compressed)" \
+    FALSE "/camera/color/image_raw/png" "Realsense Color (PNG Lossless)" \
     TRUE "/camera/color/camera_info" "Realsense Color Camera Info" \
     TRUE "/camera/aligned_depth_to_color/camera_info" "Realsense Aligned Depth to Color" \
     TRUE "/camera/aligned_depth_to_color/image_raw" "Realsense Align Depth" \

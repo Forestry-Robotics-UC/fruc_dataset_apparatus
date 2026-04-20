@@ -1,0 +1,45 @@
+.git
+.gitignore
+.names_*
+rosbags
+rosbags/
+
+# Hide compilation artifacts
+docker_ws/build
+docker_ws/install/
+docker_ws/log/
+
+# Python artifacts
+__pycache__
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+.gitmodules
+
+# Tests and examples
+test/
+*.test
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+
+# Node modules (if any)
+node_modules/
+npm-debug.log

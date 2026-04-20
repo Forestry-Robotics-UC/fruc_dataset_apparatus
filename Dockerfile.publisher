@@ -18,17 +18,10 @@ RUN apt update --fix-missing && apt install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /docker_ws/src/
+# Set working directory
+WORKDIR /docker_ws
 
-COPY docker_build/apparatus_description apparatus_description
-
-WORKDIR /docker_ws/
-
-# Build the workspace
-RUN . /opt/ros/jazzy/setup.sh && \
-    colcon build --symlink-install
-
-COPY ./docker_build/entrypoint.sh /entrypoint.sh
+COPY ./docker_entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh
 
