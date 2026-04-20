@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY ./docker_ws/src/norlab_xsens_driver /tmp/docker_ws_build/src/norlab_xsens_driver
 RUN rosdep update && \
     rosdep install --from-paths /tmp/docker_ws_build/src/norlab_xsens_driver -y --ignore-src 2>/dev/null || true && \
-    pip3 install pyserial transforms3d && \
+    pip3 install --break-system-packages pyserial transforms3d && \
     rm -rf /tmp/docker_ws_build && \
     rm -rf /var/lib/apt/lists/*
 
